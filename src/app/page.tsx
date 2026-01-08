@@ -61,7 +61,7 @@ export default function Dashboard() {
       } catch (err) {
         console.error("Failed to fetch dashboard stats", err);
         // Don't show error immediately, just let it fail silently or show partial data if possible
-        setError("Failed to load some dashboard data. Please check your connection.");
+        setError("Gagal memuat beberapa data dasbor. Silakan periksa koneksi Anda.");
       } finally {
         setLoading(false);
       }
@@ -71,17 +71,17 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="flex bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="flex bg-background min-h-screen">
       <Sidebar />
       <div className="flex-1 md:ml-64 flex flex-col">
         <Header />
         <main className="flex-1 p-4 md:p-8 space-y-6 md:space-y-8 overflow-y-auto">
           <div>
-             <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent inline-block">
-                Dashboard
+             <h1 className="text-3xl font-bold tracking-tight text-foreground inline-block">
+                Dasbor
              </h1>
              <p className="text-muted-foreground mt-2">
-                Overview of your store's performance.
+                Ikhtisar performa toko Anda.
              </p>
           </div>
           
@@ -94,39 +94,39 @@ export default function Dashboard() {
                {/* Quick Stats Grid */}
                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <StatCard 
-                      title="Today's Revenue" 
+                      title="Pendapatan Hari Ini" 
                       value={formatCurrency(stats?.daily?.summary?.totalRevenue || 0)} 
                       icon={DollarSign}
-                      description={`${stats?.daily?.summary?.totalTransactions || 0} transactions`}
+                      description={`${stats?.daily?.summary?.totalTransactions || 0} transaksi`}
                       trend="up"
                    />
                    <StatCard 
-                      title="Monthly Revenue" 
+                      title="Pendapatan Bulanan" 
                       value={formatCurrency(stats?.monthly?.summary?.totalRevenue || 0)} 
                       icon={TrendingUp}
-                      description="This month so far"
+                      description="Bulan ini sejauh ini"
                    />
                     <StatCard 
-                      title="Total Products" 
+                      title="Total Produk" 
                       value="--" 
                       icon={Package}
-                      description="Active products"
+                      description="Produk aktif"
                    />
                     <StatCard 
-                      title="Active Cashiers" 
+                      title="Kasir Aktif" 
                       value="--" 
                       icon={Users}
-                      description="Staff members"
+                      description="Anggota staf"
                    />
                </div>
 
                 {/* Charts Area */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                  <Card className="col-span-4 shadow-sm border-slate-200 dark:border-slate-800">
+                  <Card className="col-span-4 shadow-sm border-slate-200">
                     <CardHeader>
-                      <CardTitle>Revenue by Category</CardTitle>
+                      <CardTitle>Pendapatan berdasarkan Kategori</CardTitle>
                       <CardDescription>
-                         Monthly breakdown by product category.
+                         Rincian bulanan berdasarkan kategori produk.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="pl-2">
@@ -140,7 +140,7 @@ export default function Dashboard() {
                                  <div className="flex items-center justify-between">
                                    <div className="flex items-center gap-2">
                                      <div className="font-medium">{cat.category}</div>
-                                     <div className="text-xs text-muted-foreground">({cat.itemsSold} items)</div>
+                                     <div className="text-xs text-muted-foreground">({cat.itemsSold} item)</div>
                                    </div>
                                    <div className="text-right">
                                      <div className="font-bold">{formatCurrency(cat.revenue)}</div>
@@ -158,18 +158,18 @@ export default function Dashboard() {
                            })
                          ) : (
                             <div className="flex h-full items-center justify-center text-muted-foreground py-8">
-                                No category data available
+                                Tidak ada data kategori yang tersedia
                             </div>
                          )}
                       </div>
                     </CardContent>
                   </Card>
                   
-                  <Card className="col-span-3 shadow-sm border-slate-200 dark:border-slate-800">
+                  <Card className="col-span-3 shadow-sm border-slate-200">
                     <CardHeader>
-                      <CardTitle>Best Sellers Today</CardTitle>
+                      <CardTitle>Penjualan Terbaik Hari Ini</CardTitle>
                       <CardDescription>
-                        Top selling products
+                        Produk terlaris
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -178,7 +178,7 @@ export default function Dashboard() {
                             stats.daily.bestSellers.slice(0, 5).map((item: any, i: number) => (
                               <div key={i} className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-bold text-sm">
+                                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                                     {i + 1}
                                   </div>
                                   <div>
@@ -186,12 +186,12 @@ export default function Dashboard() {
                                     <div className="text-xs text-muted-foreground">{formatCurrency(item.revenue)}</div>
                                   </div>
                                 </div>
-                                <div className="text-sm font-medium">{item.quantitySold} sold</div>
+                                <div className="text-sm font-medium">{item.quantitySold} terjual</div>
                               </div>
                             ))
                           ) : (
                             <div className="text-sm text-muted-foreground text-center py-8">
-                              No sales data available yet.
+                              Belum ada data penjualan yang tersedia.
                             </div>
                           )}
                        </div>
@@ -208,20 +208,22 @@ export default function Dashboard() {
 
 function StatCard({ title, value, icon: Icon, description, trend }: any) {
     return (
-        <Card className="shadow-sm border-slate-200 dark:border-slate-800 transition-all hover:shadow-md hover:-translate-y-1">
+        <Card className="shadow-sm border-border bg-card transition-all hover:shadow-md hover:-translate-y-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                     {title}
                 </CardTitle>
-                <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                    <Icon className="h-4 w-4" />
+                <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                    <Icon className="h-5 w-5" />
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{value}</div>
-                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                    {description}
-                </p>
+                <div className="text-3xl font-bold text-foreground">{value}</div>
+                {description && (
+                    <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1 font-medium">
+                        {description}
+                    </p>
+                )}
             </CardContent>
         </Card>
     );

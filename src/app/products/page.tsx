@@ -6,7 +6,7 @@ import Header from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Search, Edit, Trash2, Loader2, Package } from "lucide-react";
 import api from "@/lib/api";
@@ -154,7 +154,7 @@ export default function ProductsPage() {
       fetchData();
     } catch (error) {
       console.error("Failed to add product", error);
-      alert("Failed to add product");
+      alert("Gagal menambah produk");
     } finally {
       setFormLoading(false);
     }
@@ -195,7 +195,7 @@ export default function ProductsPage() {
       fetchData();
     } catch (error) {
         console.error("Failed to update product", error);
-        alert("Failed to update product");
+        alert("Gagal memperbarui produk");
     } finally {
         setFormLoading(false);
     }
@@ -215,7 +215,7 @@ export default function ProductsPage() {
       fetchData();
     } catch (error) {
         console.error("Failed to delete product", error);
-        alert("Failed to delete product");
+        alert("Gagal menghapus produk");
     } finally {
         setFormLoading(false);
     }
@@ -227,108 +227,113 @@ export default function ProductsPage() {
   );
 
   return (
-    <div className="flex bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="flex bg-background min-h-screen">
       <Sidebar />
       <div className="flex-1 md:ml-64 flex flex-col">
         <Header />
         <main className="flex-1 p-8 space-y-8 overflow-y-auto">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent inline-block">
-                Products
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                Katalog Produk
               </h1>
-              <p className="text-muted-foreground mt-2">
-                Manage your menu items and inventory.
+              <p className="text-muted-foreground mt-1">
+                Kelola item menu dan inventaris toko Anda secara visual.
               </p>
             </div>
-            <Button onClick={() => { resetForm(); setIsAddOpen(true); }} className="shadow-lg shadow-primary/20">
-              <Plus className="w-4 h-4 mr-2" /> Add Product
+            <Button onClick={() => { resetForm(); setIsAddOpen(true); }} className="shadow-lg shadow-primary/25 h-11 px-6 font-semibold">
+              <Plus className="w-5 h-5 mr-2" /> Tambah Produk Baru
             </Button>
           </div>
 
-          <div className="flex items-center gap-4 bg-white dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-4 bg-white p-2 pl-5 rounded-2xl border border-border shadow-sm max-w-2xl">
             <Search className="w-5 h-5 text-muted-foreground" />
             <Input 
-              placeholder="Search products..." 
+              placeholder="Cari berdasarkan nama atau kategori..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="border-none shadow-none focus-visible:ring-0 bg-transparent text-base"
+              className="border-none shadow-none focus-visible:ring-0 bg-transparent text-base h-10"
             />
           </div>
-
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 overflow-hidden shadow-sm">
-            <Table>
-              <TableHeader className="bg-slate-50 dark:bg-slate-900">
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                    <TableRow>
-                        <TableCell colSpan={5} className="h-24 text-center">
-                            <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
-                        </TableCell>
-                    </TableRow>
-                ) : filteredProducts.length === 0 ? (
-                    <TableRow>
-                        <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                            No products found.
-                        </TableCell>
-                    </TableRow>
-                ) : (
-                    filteredProducts.map((product) => (
-                    <TableRow key={product.id}>
-                        <TableCell className="font-medium">
-                            <div className="flex items-center gap-3">
-                                {product.imageUrl ? (
-                                    <img 
-                                        src={product.imageUrl} 
-                                        alt={product.name}
-                                        className="w-10 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-700"
-                                        onError={(e) => {
-                                            e.currentTarget.style.display = 'none';
-                                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                        }}
-                                    />
-                                ) : null}
-                                <div className={`p-2 rounded-lg bg-slate-100 dark:bg-slate-800 ${product.imageUrl ? 'hidden' : ''}`}>
-                                    <Package className="w-4 h-4 text-muted-foreground" />
-                                </div>
-                                {product.name}
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                            <span className="px-2 py-1 rounded-md bg-secondary/10 text-secondary text-xs font-medium">
-                                {product.category?.name || "Uncategorized"}
-                            </span>
-                        </TableCell>
-                        <TableCell>{formatCurrency(product.price)}</TableCell>
-                        <TableCell>
-                            <span className={product.stock < 10 ? "text-destructive font-medium" : "text-emerald-600"}>
-                                {product.stock}
-                            </span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                                <Button variant="ghost" size="icon" onClick={() => handleEditClick(product)}>
-                                    <Edit className="w-4 h-4" />
-                                </Button>
-                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDeleteClick(product)}>
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
-                            </div>
-                        </TableCell>
-                    </TableRow>
-                    ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          {loading ? (
+            <div className="h-96 flex items-center justify-center">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="rounded-xl border border-border bg-card p-20 text-center shadow-sm">
+              <Package className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground">Produk tidak ditemukan</h3>
+              <p className="text-muted-foreground mt-1">Coba sesuaikan pencarian Anda atau tambah produk baru.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.map((product) => (
+                <Card key={product.id} className="group overflow-hidden border-border bg-card hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                  <div className="aspect-square relative overflow-hidden bg-slate-100">
+                    {product.imageUrl ? (
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <div className={`w-full h-full flex items-center justify-center ${product.imageUrl ? 'hidden' : ''}`}>
+                      <Package className="w-12 h-12 text-muted-foreground/20" />
+                    </div>
+                    
+                    {/* Corner Badge for Stock */}
+                    {product.stock < 10 && (
+                      <div className="absolute top-2 right-2 px-2 py-1 rounded bg-destructive text-destructive-foreground text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                        Stok Menipis
+                      </div>
+                    )}
+                  </div>
+                  
+                  <CardContent className="p-4">
+                    <div className="mb-1">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                        {product.category?.name || "Tanpa Kategori"}
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-foreground text-lg line-clamp-1 mb-2" title={product.name}>
+                      {product.name}
+                    </h3>
+                    <div className="flex items-center justify-between mt-auto">
+                      <div className="text-lg font-black text-foreground">
+                        {formatCurrency(product.price)}
+                      </div>
+                      <div className={`text-xs font-medium px-2 py-1 rounded-full ${product.stock < 10 ? 'bg-destructive/10 text-destructive' : 'bg-emerald-50 text-emerald-600'}`}>
+                        Stok: {product.stock}
+                      </div>
+                    </div>
+                  </CardContent>
+                  
+                  <div className="p-4 pt-0 flex gap-2 border-t border-border/50 mt-2 bg-slate-50/50">
+                    <Button 
+                      variant="ghost" 
+                      className="flex-1 h-9 text-xs font-semibold hover:bg-primary/10 hover:text-primary transition-colors"
+                      onClick={() => handleEditClick(product)}
+                    >
+                      <Edit className="w-3.5 h-3.5 mr-2" />
+                      Edit
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="flex-1 h-9 text-xs font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors"
+                      onClick={() => handleDeleteClick(product)}
+                    >
+                      <Trash2 className="w-3.5 h-3.5 mr-2" />
+                      Hapus
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </main>
       </div>
 
@@ -336,26 +341,26 @@ export default function ProductsPage() {
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Product</DialogTitle>
-            <DialogDescription>Create a new item for your menu.</DialogDescription>
+            <DialogTitle>Tambah Produk Baru</DialogTitle>
+            <DialogDescription>Buat item baru untuk menu Anda.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAddSubmit} className="space-y-6 py-4">
              {/* Basic Information */}
              <div className="space-y-4">
-                <h3 className="text-sm font-semibold border-b pb-2">Basic Information</h3>
+                <h3 className="text-sm font-semibold border-b pb-2">Informasi Dasar</h3>
                 <div className="space-y-3">
                    <div className="space-y-2">
-                      <Label htmlFor="name">Product Name *</Label>
-                      <Input id="name" name="name" value={formData.name} onChange={handleInputChange} placeholder="e.g., Nasi Goreng Spesial" required />
+                      <Label htmlFor="name">Nama Produk *</Label>
+                      <Input id="name" name="name" value={formData.name} onChange={handleInputChange} placeholder="misal: Nasi Goreng Spesial" required />
                    </div>
                    <div className="space-y-2">
-                      <Label htmlFor="description">Description</Label>
-                      <Input id="description" name="description" value={formData.description} onChange={handleInputChange} placeholder="Brief description" />
+                      <Label htmlFor="description">Deskripsi</Label>
+                      <Input id="description" name="description" value={formData.description} onChange={handleInputChange} placeholder="Deskripsi singkat" />
                    </div>
                    <div className="space-y-2">
-                      <Label htmlFor="categoryId">Category *</Label>
+                      <Label htmlFor="categoryId">Kategori *</Label>
                       <select id="categoryId" name="categoryId" className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={formData.categoryId} onChange={handleInputChange} required>
-                          <option value="">Select category</option>
+                          <option value="">Pilih kategori</option>
                           {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
                       </select>
                    </div>
@@ -363,32 +368,32 @@ export default function ProductsPage() {
              </div>
              {/* Pricing & Stock */}
              <div className="space-y-4">
-                <h3 className="text-sm font-semibold border-b pb-2">Pricing & Inventory</h3>
+                <h3 className="text-sm font-semibold border-b pb-2">Harga & Inventaris</h3>
                 <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-2">
-                      <Label htmlFor="price">Price (Rp) *</Label>
+                      <Label htmlFor="price">Harga (Rp) *</Label>
                       <Input id="price" name="price" type="number" min="0" value={formData.price} onChange={handleInputChange} placeholder="25000" required />
                    </div>
                    <div className="space-y-2">
-                      <Label htmlFor="stock">Stock *</Label>
+                      <Label htmlFor="stock">Stok *</Label>
                       <Input id="stock" name="stock" type="number" min="0" value={formData.stock} onChange={handleInputChange} placeholder="50" required />
                    </div>
                 </div>
              </div>
              {/* Image */}
              <div className="space-y-4">
-                <h3 className="text-sm font-semibold border-b pb-2">Product Image</h3>
+                <h3 className="text-sm font-semibold border-b pb-2">Gambar Produk</h3>
                 <div className="space-y-3">
                    <Input id="imageFile" name="imageFile" type="file" accept="image/*" onChange={handleFileChange} className="cursor-pointer" />
-                   <p className="text-xs text-muted-foreground">JPG, PNG, or WebP (max 5MB)</p>
-                   {imagePreview && (<div className="flex gap-3 p-3 bg-muted rounded-lg"><img src={imagePreview} alt="Preview" className="w-20 h-20 object-cover rounded-md" /><span className="text-sm text-muted-foreground">Ready to upload</span></div>)}
-                   <div className="relative"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground">OR</span></div></div>
-                   <div className="space-y-2"><Label htmlFor="image">Image URL</Label><Input id="image" name="image" type="url" value={formData.image} onChange={handleInputChange} placeholder="https://example.com/image.jpg" /><p className="text-xs text-muted-foreground">Paste direct link to image</p></div>
+                   <p className="text-xs text-muted-foreground">JPG, PNG, atau WebP (maks 5MB)</p>
+                   {imagePreview && (<div className="flex gap-3 p-3 bg-muted rounded-lg"><img src={imagePreview} alt="Preview" className="w-20 h-20 object-cover rounded-md" /><span className="text-sm text-muted-foreground">Siap diunggah</span></div>)}
+                   <div className="relative"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground">ATAU</span></div></div>
+                   <div className="space-y-2"><Label htmlFor="image">URL Gambar</Label><Input id="image" name="image" type="url" value={formData.image} onChange={handleInputChange} placeholder="https://example.com/image.jpg" /><p className="text-xs text-muted-foreground">Tempel tautan langsung ke gambar</p></div>
                 </div>
              </div>
              <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setIsAddOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={formLoading}>{formLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}{formLoading ? "Creating..." : "Create Product"}</Button>
+                <Button type="button" variant="ghost" onClick={() => setIsAddOpen(false)}>Batal</Button>
+                <Button type="submit" disabled={formLoading}>{formLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}{formLoading ? "Membuat..." : "Buat Produk"}</Button>
              </DialogFooter>
           </form>
         </DialogContent>
@@ -398,26 +403,26 @@ export default function ProductsPage() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Product</DialogTitle>
-             <DialogDescription>Update details for {currentProduct?.name}</DialogDescription>
+            <DialogTitle>Edit Produk</DialogTitle>
+             <DialogDescription>Perbarui rincian untuk {currentProduct?.name}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEditSubmit} className="space-y-6 py-4">
              {/* Basic Information */}
              <div className="space-y-4">
-                <h3 className="text-sm font-semibold border-b pb-2">Basic Information</h3>
+                <h3 className="text-sm font-semibold border-b pb-2">Informasi Dasar</h3>
                 <div className="space-y-3">
                    <div className="space-y-2">
-                      <Label htmlFor="edit-name">Product Name *</Label>
+                      <Label htmlFor="edit-name">Nama Produk *</Label>
                       <Input id="edit-name" name="name" value={formData.name} onChange={handleInputChange} required />
                    </div>
                    <div className="space-y-2">
-                      <Label htmlFor="edit-description">Description</Label>
-                      <Input id="edit-description" name="description" value={formData.description} onChange={handleInputChange} placeholder="Brief description" />
+                      <Label htmlFor="edit-description">Deskripsi</Label>
+                      <Input id="edit-description" name="description" value={formData.description} onChange={handleInputChange} placeholder="Deskripsi singkat" />
                    </div>
                    <div className="space-y-2">
-                      <Label htmlFor="edit-categoryId">Category *</Label>
+                      <Label htmlFor="edit-categoryId">Kategori *</Label>
                       <select id="edit-categoryId" name="categoryId" className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" value={formData.categoryId} onChange={handleInputChange} required>
-                          <option value="">Select category</option>
+                          <option value="">Pilih kategori</option>
                           {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
                       </select>
                    </div>
@@ -425,32 +430,32 @@ export default function ProductsPage() {
              </div>
              {/* Pricing & Stock */}
              <div className="space-y-4">
-                <h3 className="text-sm font-semibold border-b pb-2">Pricing & Inventory</h3>
+                <h3 className="text-sm font-semibold border-b pb-2">Harga & Inventaris</h3>
                 <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-2">
-                      <Label htmlFor="edit-price">Price (Rp) *</Label>
+                      <Label htmlFor="edit-price">Harga (Rp) *</Label>
                       <Input id="edit-price" name="price" type="number" min="0" value={formData.price} onChange={handleInputChange} required />
                    </div>
                    <div className="space-y-2">
-                      <Label htmlFor="edit-stock">Stock *</Label>
+                      <Label htmlFor="edit-stock">Stok *</Label>
                       <Input id="edit-stock" name="stock" type="number" min="0" value={formData.stock} onChange={handleInputChange} required />
                    </div>
                 </div>
              </div>
              {/* Image */}
              <div className="space-y-4">
-                <h3 className="text-sm font-semibold border-b pb-2">Product Image</h3>
+                <h3 className="text-sm font-semibold border-b pb-2">Gambar Produk</h3>
                 <div className="space-y-3">
                    <Input id="edit-imageFile" name="imageFile" type="file" accept="image/*" onChange={handleFileChange} className="cursor-pointer" />
-                   <p className="text-xs text-muted-foreground">Upload new image (JPG, PNG, or WebP)</p>
-                   {(imagePreview || formData.image) && (<div className="flex gap-3 p-3 bg-muted rounded-lg"><img src={imagePreview || formData.image} alt="Preview" className="w-20 h-20 object-cover rounded-md" /><span className="text-sm text-muted-foreground">{imagePreview ? "New image selected" : "Current image"}</span></div>)}
-                   <div className="relative"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground">OR</span></div></div>
-                   <div className="space-y-2"><Label htmlFor="edit-image">Image URL</Label><Input id="edit-image" name="image" type="url" value={formData.image} onChange={handleInputChange} placeholder="https://example.com/image.jpg" /></div>
+                   <p className="text-xs text-muted-foreground">Unggah gambar baru (JPG, PNG, atau WebP)</p>
+                   {(imagePreview || formData.image) && (<div className="flex gap-3 p-3 bg-muted rounded-lg"><img src={imagePreview || formData.image} alt="Preview" className="w-20 h-20 object-cover rounded-md" /><span className="text-sm text-muted-foreground">{imagePreview ? "Gambar baru dipilih" : "Gambar saat ini"}</span></div>)}
+                   <div className="relative"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground">ATAU</span></div></div>
+                   <div className="space-y-2"><Label htmlFor="edit-image">URL Gambar</Label><Input id="edit-image" name="image" type="url" value={formData.image} onChange={handleInputChange} placeholder="https://example.com/image.jpg" /></div>
                 </div>
              </div>
              <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setIsEditOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={formLoading}>{formLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}{formLoading ? "Updating..." : "Update Product"}</Button>
+                <Button type="button" variant="ghost" onClick={() => setIsEditOpen(false)}>Batal</Button>
+                <Button type="submit" disabled={formLoading}>{formLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}{formLoading ? "Memperbarui..." : "Perbarui Produk"}</Button>
              </DialogFooter>
           </form>
         </DialogContent>
@@ -460,16 +465,16 @@ export default function ProductsPage() {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Product</DialogTitle>
+            <DialogTitle>Hapus Produk</DialogTitle>
             <DialogDescription>
-                Are you sure you want to delete <strong>{currentProduct?.name}</strong>? This action cannot be undone.
+                Apakah Anda yakin ingin menghapus <strong>{currentProduct?.name}</strong>? Tindakan ini tidak dapat dibatalkan.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-             <Button type="button" variant="ghost" onClick={() => setIsDeleteOpen(false)}>Cancel</Button>
+             <Button type="button" variant="ghost" onClick={() => setIsDeleteOpen(false)}>Batal</Button>
              <Button type="button" variant="destructive" onClick={handleDeleteSubmit} disabled={formLoading}>
                   {formLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                 Delete
+                 Hapus
              </Button>
           </DialogFooter>
         </DialogContent>

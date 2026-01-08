@@ -39,7 +39,7 @@ export default function LoginPage() {
       }
       
       if (user.role !== 'ADMIN') {
-          setError("Access denied. Only Admins can access this portal.");
+          setError("Akses ditolak. Hanya Admin yang dapat mengakses portal ini.");
           setIsLoading(false);
           return;
       }
@@ -47,37 +47,40 @@ export default function LoginPage() {
       login(accessToken, user);
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.message || err.message || "Invalid credentials");
+      setError(err.response?.data?.message || err.message || "Kredensial tidak valid");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Decorative background element */}
+      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.1),transparent_50%)]" />
+      
       <div className="absolute inset-0 bg-grid-slate-200 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-800/50" />
       
-      <Card className="w-full max-w-md relative z-10 glass border-slate-200/50 dark:border-slate-700/50 shadow-2xl animate-fade-in">
+      <Card className="w-full max-w-md relative z-10 border-border shadow-2xl animate-fade-in bg-card">
         <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-             <div className="p-3 rounded-2xl bg-primary/10 text-primary">
-                <Store className="w-10 h-10" />
+          <div className="flex justify-center mb-6">
+             <div className="p-4 rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-inner">
+                <Store className="w-12 h-12" />
              </div>
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">Admin Portal</CardTitle>
-          <CardDescription>
-            Enter your credentials to access the dashboard
+          <CardTitle className="text-3xl font-bold tracking-tight text-foreground">Portal Admin</CardTitle>
+          <CardDescription className="text-muted-foreground mt-2">
+            Masukkan kredensial Anda untuk mengakses dasbor
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5 py-6">
              {error && (
-                <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm font-medium">
+                <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm font-medium border border-destructive/20 animate-in fade-in slide-in-from-top-1">
                   {error}
                 </div>
              )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-semibold">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -85,32 +88,32 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-white/50 dark:bg-slate-950/50"
+                className="bg-background border-border focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" title="password" className="text-sm font-semibold">Kata Sandi</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-white/50 dark:bg-slate-950/50"
+                className="bg-background border-border focus:ring-2 focus:ring-primary/20"
               />
             </div>
           </CardContent>
-          <CardFooter>
-            <Button className="w-full shadow-lg shadow-primary/20" type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign In
+          <CardFooter className="pb-8">
+            <Button className="w-full h-11 text-base font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all" type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+              Masuk
             </Button>
           </CardFooter>
         </form>
       </Card>
       
-      <div className="absolute bottom-4 text-center text-xs text-muted-foreground">
-        &copy; 2026 POS System. All rights reserved.
+      <div className="absolute bottom-6 text-center text-xs text-muted-foreground font-medium">
+        &copy; 2026 Sistem POS. Hak cipta dilindungi undang-undang.
       </div>
     </div>
   );

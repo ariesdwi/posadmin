@@ -84,7 +84,7 @@ export default function UsersPage() {
       fetchData();
     } catch (error) {
       console.error("Failed to add user", error);
-      alert("Failed to add user");
+      alert("Gagal menambah pengguna");
     } finally {
       setFormLoading(false);
     }
@@ -115,7 +115,7 @@ export default function UsersPage() {
       fetchData();
     } catch (error) {
         console.error("Failed to update user", error);
-        alert("Failed to update user");
+        alert("Gagal memperbarui pengguna");
     } finally {
         setFormLoading(false);
     }
@@ -135,7 +135,7 @@ export default function UsersPage() {
       fetchData();
     } catch (error) {
         console.error("Failed to delete user", error);
-        alert("Failed to delete user");
+        alert("Gagal menghapus pengguna");
     } finally {
         setFormLoading(false);
     }
@@ -147,42 +147,42 @@ export default function UsersPage() {
   );
 
   return (
-    <div className="flex bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="flex bg-background min-h-screen">
       <Sidebar />
       <div className="flex-1 md:ml-64 flex flex-col">
         <Header />
         <main className="flex-1 p-8 space-y-8 overflow-y-auto">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent inline-block">
-                User Management
+              <h1 className="text-3xl font-bold tracking-tight text-foreground inline-block">
+                Manajemen Pengguna
               </h1>
               <p className="text-muted-foreground mt-2">
-                Manage admin and cashier accounts.
+                Kelola akun admin dan kasir.
               </p>
             </div>
             <Button onClick={() => { resetForm(); setIsAddOpen(true); }} className="shadow-lg shadow-primary/20">
-              <Plus className="w-4 h-4 mr-2" /> Add User
+              <Plus className="w-4 h-4 mr-2" /> Tambah Pengguna
             </Button>
           </div>
 
-          <div className="flex items-center gap-4 bg-white dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-4 bg-card p-4 rounded-xl border border-border shadow-sm">
             <Search className="w-5 h-5 text-muted-foreground" />
             <Input 
-              placeholder="Search users..." 
+              placeholder="Cari pengguna..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="border-none shadow-none focus-visible:ring-0 bg-transparent text-base"
             />
           </div>
 
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 overflow-hidden shadow-sm">
+          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
             <Table>
-              <TableHeader className="bg-slate-50 dark:bg-slate-900">
+              <TableHeader className="bg-background/50">
                 <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Pengguna</TableHead>
+                  <TableHead>Peran</TableHead>
+                  <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -195,7 +195,7 @@ export default function UsersPage() {
                 ) : filteredUsers.length === 0 ? (
                     <TableRow>
                         <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">
-                            No users found.
+                            Pengguna tidak ditemukan.
                         </TableCell>
                     </TableRow>
                 ) : (
@@ -203,18 +203,18 @@ export default function UsersPage() {
                     <TableRow key={user.id}>
                         <TableCell className="font-medium">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-full bg-slate-100 dark:bg-slate-800">
+                                <div className="p-2 rounded-full bg-slate-100">
                                     <User className="w-4 h-4 text-muted-foreground" />
                                 </div>
                                 <div>
-                                    <div className="font-medium">{user.name || "No Name"}</div>
+                                    <div className="font-medium">{user.name || "Tanpa Nama"}</div>
                                     <div className="text-xs text-muted-foreground">{user.email}</div>
                                 </div>
                             </div>
                         </TableCell>
                         <TableCell>
-                            <span className={`px-2 py-1 rounded-md text-xs font-medium ${user.role === 'ADMIN' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'}`}>
-                                {user.role === 'ADMIN' ? 'Administrator' : 'Cashier'}
+                            <span className={`px-2 py-1 rounded-md text-xs font-medium ${user.role === 'ADMIN' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                {user.role === 'ADMIN' ? 'Administrator' : 'Kasir'}
                             </span>
                         </TableCell>
                         <TableCell className="text-right">
@@ -241,8 +241,8 @@ export default function UsersPage() {
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New User</DialogTitle>
-            <DialogDescription>Create a new account for an admin or cashier.</DialogDescription>
+            <DialogTitle>Tambah Pengguna Baru</DialogTitle>
+            <DialogDescription>Buat akun baru untuk admin atau kasir.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAddSubmit} className="space-y-4 py-4">
              <div className="grid grid-cols-2 gap-4">
@@ -251,15 +251,15 @@ export default function UsersPage() {
                     <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} required />
                 </div>
                 <div className="space-y-2 col-span-2">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">Kata Sandi</Label>
                     <Input id="password" name="password" type="password" value={formData.password} onChange={handleInputChange} required />
                 </div>
                 <div className="space-y-2 col-span-2">
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="name">Nama Lengkap</Label>
                     <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required />
                 </div>
                 <div className="space-y-2 col-span-2">
-                    <Label htmlFor="role">Role</Label>
+                    <Label htmlFor="role">Peran</Label>
                     <select 
                         id="role" 
                         name="role" 
@@ -274,10 +274,10 @@ export default function UsersPage() {
                 </div>
              </div>
              <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setIsAddOpen(false)}>Cancel</Button>
+                <Button type="button" variant="ghost" onClick={() => setIsAddOpen(false)}>Batal</Button>
                 <Button type="submit" disabled={formLoading}>
                     {formLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                    Save
+                    Simpan
                 </Button>
              </DialogFooter>
           </form>
@@ -288,12 +288,12 @@ export default function UsersPage() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
-             <DialogDescription>Update account details for {currentUser?.email}</DialogDescription>
+            <DialogTitle>Edit Pengguna</DialogTitle>
+             <DialogDescription>Perbarui rincian akun untuk {currentUser?.email}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEditSubmit} className="space-y-4 py-4">
              <div className="space-y-2">
-                <Label htmlFor="edit-name">Name</Label>
+                <Label htmlFor="edit-name">Nama</Label>
                 <Input id="edit-name" name="name" value={formData.name} onChange={handleInputChange} required />
              </div>
              <div className="space-y-2">
@@ -301,11 +301,11 @@ export default function UsersPage() {
                 <Input id="edit-email" name="email" type="email" value={formData.email} onChange={handleInputChange} required />
              </div>
              <div className="space-y-2">
-                <Label htmlFor="edit-password">Password (Leave blank to keep current)</Label>
+                <Label htmlFor="edit-password">Kata Sandi (Kosongkan jika tidak ingin diubah)</Label>
                 <Input id="edit-password" name="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleInputChange} />
              </div>
              <div className="space-y-2">
-                <Label htmlFor="edit-role">Role</Label>
+                <Label htmlFor="edit-role">Peran</Label>
                 <select 
                     id="edit-role" 
                     name="role" 
@@ -314,15 +314,15 @@ export default function UsersPage() {
                     onChange={handleInputChange}
                     required
                 >
-                    <option value="KASIR">Cashier</option>
+                    <option value="KASIR">Kasir</option>
                     <option value="ADMIN">Administrator</option>
                 </select>
              </div>
              <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+                <Button type="button" variant="ghost" onClick={() => setIsEditOpen(false)}>Batal</Button>
                 <Button type="submit" disabled={formLoading}>
                      {formLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                    Update User
+                    Perbarui Pengguna
                 </Button>
              </DialogFooter>
           </form>
@@ -333,16 +333,16 @@ export default function UsersPage() {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete User</DialogTitle>
+            <DialogTitle>Hapus Pengguna</DialogTitle>
             <DialogDescription>
-                Are you sure you want to delete <strong>{currentUser?.email}</strong>? This action cannot be undone.
+                Apakah Anda yakin ingin menghapus <strong>{currentUser?.email}</strong>? Tindakan ini tidak dapat dibatalkan.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-             <Button type="button" variant="ghost" onClick={() => setIsDeleteOpen(false)}>Cancel</Button>
+             <Button type="button" variant="ghost" onClick={() => setIsDeleteOpen(false)}>Batal</Button>
              <Button type="button" variant="destructive" onClick={handleDeleteSubmit} disabled={formLoading}>
                   {formLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                 Delete
+                 Hapus
              </Button>
           </DialogFooter>
         </DialogContent>

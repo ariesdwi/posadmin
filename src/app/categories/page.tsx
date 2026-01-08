@@ -65,7 +65,7 @@ export default function CategoriesPage() {
       fetchData();
     } catch (error) {
       console.error("Failed to add category", error);
-      alert("Failed to add category");
+      alert("Gagal menambah kategori");
     } finally {
       setFormLoading(false);
     }
@@ -88,7 +88,7 @@ export default function CategoriesPage() {
       fetchData();
     } catch (error) {
         console.error("Failed to update category", error);
-        alert("Failed to update category");
+        alert("Gagal memperbarui kategori");
     } finally {
         setFormLoading(false);
     }
@@ -108,7 +108,7 @@ export default function CategoriesPage() {
       fetchData();
     } catch (error) {
         console.error("Failed to delete category", error);
-        alert("Failed to delete category (Ensure it has no products)");
+        alert("Gagal menghapus kategori (Pastikan tidak ada produk di dalamnya)");
     } finally {
         setFormLoading(false);
     }
@@ -119,41 +119,41 @@ export default function CategoriesPage() {
   );
 
   return (
-    <div className="flex bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="flex bg-background min-h-screen">
       <Sidebar />
       <div className="flex-1 md:ml-64 flex flex-col">
         <Header />
         <main className="flex-1 p-8 space-y-8 overflow-y-auto">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent inline-block">
-                Categories
+              <h1 className="text-3xl font-bold tracking-tight text-foreground inline-block">
+                Kategori
               </h1>
               <p className="text-muted-foreground mt-2">
-                Organize your menu items.
+                Atur item menu Anda.
               </p>
             </div>
             <Button onClick={() => { setName(""); setIsAddOpen(true); }} className="shadow-lg shadow-primary/20">
-              <Plus className="w-4 h-4 mr-2" /> Add Category
+              <Plus className="w-4 h-4 mr-2" /> Tambah Kategori
             </Button>
           </div>
 
-          <div className="flex items-center gap-4 bg-white dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-4 bg-card p-4 rounded-xl border border-border shadow-sm">
             <Search className="w-5 h-5 text-muted-foreground" />
             <Input 
-              placeholder="Search categories..." 
+              placeholder="Cari kategori..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="border-none shadow-none focus-visible:ring-0 bg-transparent text-base"
             />
           </div>
 
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 overflow-hidden shadow-sm">
+          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
             <Table>
-              <TableHeader className="bg-slate-50 dark:bg-slate-900">
+              <TableHeader className="bg-background/50">
                 <TableRow>
-                  <TableHead>Category Name</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Nama Kategori</TableHead>
+                  <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -166,7 +166,7 @@ export default function CategoriesPage() {
                 ) : filteredCategories.length === 0 ? (
                     <TableRow>
                         <TableCell colSpan={2} className="h-24 text-center text-muted-foreground">
-                            No categories found.
+                            Kategori tidak ditemukan.
                         </TableCell>
                     </TableRow>
                 ) : (
@@ -174,7 +174,7 @@ export default function CategoriesPage() {
                     <TableRow key={category.id}>
                         <TableCell className="font-medium">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400">
+                                <div className="p-2 rounded-lg bg-orange-100 text-orange-600">
                                     <Layers className="w-4 h-4" />
                                 </div>
                                 {category.name}
@@ -203,22 +203,22 @@ export default function CategoriesPage() {
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Category</DialogTitle>
+            <DialogTitle>Tambah Kategori</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAddSubmit} className="space-y-4 py-4">
             <div className="space-y-2">
-                <Label htmlFor="name">Category Name</Label>
+                <Label htmlFor="name">Nama Kategori</Label>
                 <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Input id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional description" />
+                <Label htmlFor="description">Deskripsi</Label>
+                <Input id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Deskripsi opsional" />
             </div>
              <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setIsAddOpen(false)}>Cancel</Button>
+                <Button type="button" variant="ghost" onClick={() => setIsAddOpen(false)}>Batal</Button>
                 <Button type="submit" disabled={formLoading}>
                     {formLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                    Save
+                    Simpan
                 </Button>
              </DialogFooter>
           </form>
@@ -228,23 +228,20 @@ export default function CategoriesPage() {
       {/* Edit Category Dialog */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Category</DialogTitle>
-          </DialogHeader>
           <form onSubmit={handleEditSubmit} className="space-y-4 py-4">
              <div className="space-y-2">
-                <Label htmlFor="edit-name">Category Name</Label>
+                <Label htmlFor="edit-name">Nama Kategori</Label>
                 <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} required />
              </div>
              <div className="space-y-2">
-                <Label htmlFor="edit-description">Description</Label>
-                <Input id="edit-description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional description" />
+                <Label htmlFor="edit-description">Deskripsi</Label>
+                <Input id="edit-description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Deskripsi opsional" />
              </div>
              <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+                <Button type="button" variant="ghost" onClick={() => setIsEditOpen(false)}>Batal</Button>
                 <Button type="submit" disabled={formLoading}>
                      {formLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                    Update
+                    Perbarui
                 </Button>
              </DialogFooter>
           </form>
@@ -255,17 +252,17 @@ export default function CategoriesPage() {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Category</DialogTitle>
+            <DialogTitle>Hapus Kategori</DialogTitle>
             <DialogDescription>
-                Are you sure you want to delete <strong>{currentCategory?.name}</strong>?
-                <br /><span className="text-red-500 text-xs">Note: Categories with products cannot be deleted.</span>
+                Apakah Anda yakin ingin menghapus <strong>{currentCategory?.name}</strong>?
+                <br /><span className="text-red-500 text-xs">Catatan: Kategori dengan produk tidak dapat dihapus.</span>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-             <Button type="button" variant="ghost" onClick={() => setIsDeleteOpen(false)}>Cancel</Button>
+             <Button type="button" variant="ghost" onClick={() => setIsDeleteOpen(false)}>Batal</Button>
              <Button type="button" variant="destructive" onClick={handleDeleteSubmit} disabled={formLoading}>
                   {formLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                 Delete
+                 Hapus
              </Button>
           </DialogFooter>
         </DialogContent>

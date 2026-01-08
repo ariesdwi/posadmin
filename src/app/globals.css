@@ -1,62 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  /* Food-themed Color Palette */
-  /* Primary: Warm Red (appetite, energy) */
-  --primary: 0 76% 42%;
-  --primary-foreground: 210 40% 98%;
+  /* Mobile Cashier Sync Palette */
+  --primary: 239 84% 67%;
+  --primary-foreground: 0 0% 100%;
 
-  /* Secondary: Olive Green (fresh, organic) */
-  --secondary: 83 60% 35%;
+  --secondary: 215 16% 47%;
+  /* Slate 500 */
   --secondary-foreground: 210 40% 98%;
 
-  /* Accent: Gold (premium, highlights) */
-  --accent: 28 92% 44%;
-  --accent-foreground: 210 40% 98%;
+  --accent: 199 89% 48%;
+  /* Info Sky */
+  --accent-foreground: 0 0% 100%;
 
-  /* Backgrounds - Cream tones */
-  --background: 48 100% 93%;
-  /* Light Mode: Cream */
-  --foreground: 30 100% 11%;
-  /* Dark Brown for text */
+  /* Backgrounds */
+  --background: 210 40% 98%;
+  /* Page Background (Slate 50) */
+  --foreground: 222 47% 11%;
+  /* Slate 900 */
 
-  --card: 48 100% 96%;
-  --card-foreground: 30 100% 11%;
+  --card: 0 0% 100%;
+  /* White Surface */
+  --card-foreground: 222 47% 11%;
 
-  --popover: 48 100% 96%;
-  --popover-foreground: 30 100% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
 
-  --muted: 48 60% 90%;
-  --muted-foreground: 30 60% 35%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
 
-  --border: 48 40% 85%;
-  --input: 48 40% 85%;
+  --border: 214 32% 91%;
+  /* Slate 200 */
+  --input: 214 32% 91%;
 
-  --destructive: 0 76% 42%;
-  /* Same as primary red */
-  --destructive-foreground: 210 40% 98%;
+  --destructive: 350 89% 60%;
+  /* Danger Rose */
+  --destructive-foreground: 0 0% 100%;
+
+  /* Sidebar Specific (Navy) */
+  --sidebar: 222 47% 11%;
+  --sidebar-foreground: 210 40% 98%;
+  --sidebar-primary: 239 84% 67%;
+  --sidebar-accent: 214 32% 91%;
 
   --radius: 0.75rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Dark Mode: Deep Brown/Warm Dark */
-    --background: 30 40% 8%;
-    --foreground: 48 100% 93%;
-
-    --card: 30 35% 10%;
-    --card-foreground: 48 100% 93%;
-
-    --popover: 30 35% 10%;
-    --popover-foreground: 48 100% 93%;
-
-    --muted: 30 25% 15%;
-    --muted-foreground: 48 40% 70%;
-
-    --border: 30 25% 18%;
-    --input: 30 25% 18%;
-  }
 }
 
 @theme inline {
@@ -78,6 +65,16 @@
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
+
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+
+  --color-success: #10B981;
+  --color-danger: #F43F5E;
+  --color-warning: #F59E0B;
+  --color-info: #0EA5E9;
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);

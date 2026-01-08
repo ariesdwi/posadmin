@@ -72,18 +72,18 @@ export default function ReportsPage() {
   }, []);
 
   return (
-    <div className="flex bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="flex bg-background min-h-screen">
       <Sidebar />
       <div className="flex-1 md:ml-64 flex flex-col">
         <Header />
         <main className="flex-1 p-8 space-y-8 overflow-y-auto">
           <div>
-             <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent inline-block">
-                Financial Reports
-             </h1>
-             <p className="text-muted-foreground mt-2">
-                Analyze your sales performance across different time periods.
-             </p>
+             <h1 className="text-3xl font-bold tracking-tight text-foreground inline-block">
+                Laporan Keuangan
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                Analisis performa penjualan Anda dalam berbagai periode waktu.
+              </p>
           </div>
 
           {loading ? (
@@ -93,28 +93,28 @@ export default function ReportsPage() {
           ) : (
              <Tabs defaultValue="monthly" className="w-full">
                 <TabsList className="grid w-full grid-cols-3 max-w-md mb-8">
-                    <TabsTrigger value="daily">Daily</TabsTrigger>
-                    <TabsTrigger value="weekly">Weekly</TabsTrigger>
-                    <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                    <TabsTrigger value="daily">Harian</TabsTrigger>
+                    <TabsTrigger value="weekly">Mingguan</TabsTrigger>
+                    <TabsTrigger value="monthly">Bulanan</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="daily" className="space-y-4 animate-fade-in">
-                    <ReportSummary data={data.daily} title="Today's Performance" icon={Calendar} />
+                    <ReportSummary data={data.daily} title="Performa Hari Ini" icon={Calendar} />
                     {/* Daily might not have a graph unless we break down by hour, assuming backend provides hourly but if not, just summary */}
                      <Card>
                         <CardHeader>
-                            <CardTitle>Daily Transactions</CardTitle>
-                             <CardDescription>Breakdown of today's sales transactions</CardDescription>
+                            <CardTitle>Transaksi Harian</CardTitle>
+                             <CardDescription>Rincian transaksi penjualan hari ini</CardDescription>
                         </CardHeader>
                         <CardContent>
                              {/* If we had hourly data we'd graph it. For now, maybe just list transactions if available in daily report */}
                              <div className="text-center py-10 text-muted-foreground">
                                 {data.daily?.transactions ? (
                                     <div className="space-y-2">
-                                        <p>{data.daily.transactions.length} transactions recorded today.</p>
+                                        <p>{data.daily.transactions.length} transaksi tercatat hari ini.</p>
                                     </div>
                                 ) : (
-                                    "No detailed transaction timeline available."
+                                    "Tidak ada timeline transaksi rinci yang tersedia."
                                 )}
                              </div>
                         </CardContent>
@@ -122,11 +122,11 @@ export default function ReportsPage() {
                 </TabsContent>
 
                 <TabsContent value="weekly" className="space-y-4 animate-fade-in">
-                    <ReportSummary data={data.weekly} title="Weekly Performance" icon={Calendar} />
+                    <ReportSummary data={data.weekly} title="Performa Mingguan" icon={Calendar} />
                     <Card>
                         <CardHeader>
-                            <CardTitle>Weekly Transactions</CardTitle>
-                            <CardDescription>All transactions from this week</CardDescription>
+                            <CardTitle>Transaksi Mingguan</CardTitle>
+                            <CardDescription>Semua transaksi dari minggu ini</CardDescription>
                         </CardHeader>
                         <CardContent>
                             {data.weekly?.transactions && data.weekly.transactions.length > 0 ? (
@@ -135,9 +135,9 @@ export default function ReportsPage() {
                                         <div key={txn.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                                             <div>
                                                 <div className="font-medium">{txn.transactionNumber}</div>
-                                                <div className="text-sm text-muted-foreground">
-                                                    {txn.cashier} • {txn.itemCount} items • {new Date(txn.createdAt).toLocaleDateString('id-ID')}
-                                                </div>
+                                                 <div className="text-sm text-muted-foreground">
+                                                     {txn.cashier} • {txn.itemCount} item • {new Date(txn.createdAt).toLocaleDateString('id-ID')}
+                                                 </div>
                                             </div>
                                             <div className="text-right">
                                                 <div className="font-bold">{formatCurrency(txn.totalAmount)}</div>
@@ -147,20 +147,20 @@ export default function ReportsPage() {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="flex h-32 items-center justify-center text-muted-foreground">No transactions this week</div>
+                                <div className="flex h-32 items-center justify-center text-muted-foreground">Tidak ada transaksi minggu ini</div>
                             )}
                         </CardContent>
                     </Card>
                 </TabsContent>
 
                 <TabsContent value="monthly" className="space-y-4 animate-fade-in">
-                    <ReportSummary data={data.monthly} title="Monthly Performance" icon={Calendar} />
+                    <ReportSummary data={data.monthly} title="Performa Bulanan" icon={Calendar} />
                     <div className="grid gap-4 md:grid-cols-2">
                         {/* Best Sellers */}
                         <Card>
                              <CardHeader>
-                                <CardTitle>Best Selling Products</CardTitle>
-                                <CardDescription>Top products this month</CardDescription>
+                                <CardTitle>Produk Terlaris</CardTitle>
+                                <CardDescription>Produk teratas bulan ini</CardDescription>
                              </CardHeader>
                              <CardContent>
                                 <div className="space-y-4">
@@ -170,17 +170,17 @@ export default function ReportsPage() {
                                                 <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-bold text-sm">
                                                     {i + 1}
                                                 </div>
-                                                <div>
-                                                    <div className="font-medium">{item.productName}</div>
-                                                    <div className="text-xs text-muted-foreground">{formatCurrency(item.revenue)} revenue</div>
-                                                </div>
-                                            </div>
-                                            <div className="text-sm font-medium">{item.quantitySold || 0} sold</div>
+                                                 <div>
+                                                     <div className="font-medium">{item.productName}</div>
+                                                     <div className="text-xs text-muted-foreground">{formatCurrency(item.revenue)} pendapatan</div>
+                                                 </div>
+                                             </div>
+                                             <div className="text-sm font-medium">{item.quantitySold || 0} terjual</div>
                                         </div>
                                     ))}
-                                    {(!data.monthly?.bestSellers || data.monthly.bestSellers.length === 0) && (
-                                        <div className="text-center text-muted-foreground py-4">No data available</div>
-                                    )}
+                                     {(!data.monthly?.bestSellers || data.monthly.bestSellers.length === 0) && (
+                                         <div className="text-center text-muted-foreground py-4">Data tidak tersedia</div>
+                                     )}
                                 </div>
                              </CardContent>
                         </Card>
@@ -188,8 +188,8 @@ export default function ReportsPage() {
                         {/* Payment Methods */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Revenue by Payment Method</CardTitle>
-                                <CardDescription>Breakdown by payment type</CardDescription>
+                                <CardTitle>Pendapatan berdasarkan Metode Pembayaran</CardTitle>
+                                <CardDescription>Rincian berdasarkan tipe pembayaran</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
@@ -199,9 +199,9 @@ export default function ReportsPage() {
                                             <div className="text-sm font-bold">{formatCurrency(amount)}</div>
                                         </div>
                                     ))}
-                                    {(!data.monthly?.revenueByPaymentMethod || Object.keys(data.monthly.revenueByPaymentMethod).length === 0) && (
-                                        <div className="text-center text-muted-foreground py-4">No data available</div>
-                                    )}
+                                     {(!data.monthly?.revenueByPaymentMethod || Object.keys(data.monthly.revenueByPaymentMethod).length === 0) && (
+                                         <div className="text-center text-muted-foreground py-4">Data tidak tersedia</div>
+                                     )}
                                 </div>
                             </CardContent>
                         </Card>
@@ -209,8 +209,8 @@ export default function ReportsPage() {
                         {/* Recent Transactions */}
                         <Card className="md:col-span-2">
                             <CardHeader>
-                                <CardTitle>Recent Transactions</CardTitle>
-                                <CardDescription>Latest transactions this month</CardDescription>
+                                <CardTitle>Transaksi Terakhir</CardTitle>
+                                <CardDescription>Transaksi terbaru bulan ini</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 {data.monthly?.transactions && data.monthly.transactions.length > 0 ? (
@@ -218,10 +218,10 @@ export default function ReportsPage() {
                                         {data.monthly.transactions.slice(0, 10).map((txn: any) => (
                                             <div key={txn.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                                                 <div>
-                                                    <div className="font-medium">{txn.transactionNumber}</div>
-                                                    <div className="text-sm text-muted-foreground">
-                                                        {txn.cashier} • {txn.itemCount} items • {new Date(txn.createdAt).toLocaleDateString('id-ID')}
-                                                    </div>
+                                                 <div className="font-medium">{txn.transactionNumber}</div>
+                                                     <div className="text-sm text-muted-foreground">
+                                                         {txn.cashier} • {txn.itemCount} item • {new Date(txn.createdAt).toLocaleDateString('id-ID')}
+                                                     </div>
                                                 </div>
                                                 <div className="text-right">
                                                     <div className="font-bold">{formatCurrency(txn.totalAmount)}</div>
@@ -231,7 +231,7 @@ export default function ReportsPage() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="flex h-32 items-center justify-center text-muted-foreground">No transactions this month</div>
+                                    <div className="flex h-32 items-center justify-center text-muted-foreground">Tidak ada transaksi bulan ini</div>
                                 )}
                             </CardContent>
                         </Card>
@@ -252,7 +252,7 @@ function ReportSummary({ data, title, icon: Icon }: any) {
         <div className="grid gap-4 md:grid-cols-3">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                    <CardTitle className="text-sm font-medium">Total Pendapatan</CardTitle>
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
@@ -261,7 +261,7 @@ function ReportSummary({ data, title, icon: Icon }: any) {
             </Card>
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Transactions</CardTitle>
+                    <CardTitle className="text-sm font-medium">Transaksi</CardTitle>
                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
@@ -270,7 +270,7 @@ function ReportSummary({ data, title, icon: Icon }: any) {
             </Card>
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Average Value</CardTitle>
+                    <CardTitle className="text-sm font-medium">Nilai Rata-rata</CardTitle>
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
