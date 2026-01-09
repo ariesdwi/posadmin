@@ -1,8 +1,8 @@
 import axios from "axios";
 import { getCookie, deleteCookie } from "cookies-next";
 
-// Default to localhost if not specified, can be overridden by env variable
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://10.168.81.25:3000";
+// Default to Vercel backend
+const API_URL = "http://10.168.81.25:3000";
 
 const api = axios.create({
   baseURL: API_URL,
