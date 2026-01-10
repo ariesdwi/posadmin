@@ -11,13 +11,17 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Plus, Search, Edit, Trash2, Loader2, Package } from "lucide-react";
 import api from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
+import { createProduct, updateProduct } from "../../services/productService";
+
+console.log('ProductService imported:', { createProduct, updateProduct });
+
 import { useAuth } from "@/context/AuthContext";
 
 interface Product {
   id: number;
   name: string;
   description?: string;
-  price: number;
+  price: number | string;
   stock: number;
   categoryId: number;
   imageUrl?: string;
@@ -58,6 +62,40 @@ export default function ProductsPage() {
   const [formLoading, setFormLoading] = useState(false);
 
   const { user } = useAuth();
+  
+  // Helper to ensure image URLs always point to the correct backend address
+  const getValidImageUrl = (url: string | undefined) => {
+    if (!url) return "";
+    
+    // If it's a data URL (base64) or external (https://i.imgur...), return as is
+    if (url.startsWith('data:') || url.startsWith('blob:')) return url;
+    
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.3:3000'; // Current IP
+    
+    // If it's a relative path, prepend the current backend URL
+    if (url.startsWith('/')) {
+        return `${API_BASE}${url}`;
+    }
+
+    // If it's an absolute URL from our own backend (potentially old IP), fix the host
+    if (url.startsWith('http')) {
+        try {
+            const urlObj = new URL(url);
+            // Check if it looks like our backend path (e.g. /uploads)
+            if (urlObj.pathname.startsWith('/uploads')) {
+                const baseObj = new URL(API_BASE);
+                urlObj.protocol = baseObj.protocol;
+                urlObj.hostname = baseObj.hostname;
+                urlObj.port = baseObj.port;
+                return urlObj.toString();
+            }
+        } catch (e) {
+            // Invalid URL, ignore
+        }
+    }
+    
+    return url;
+  };
 
   const fetchData = async () => {
     try {
@@ -110,45 +148,20 @@ export default function ProductsPage() {
     }
   };
 
-  const uploadImage = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    try {
-      const response = await api.post('/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      // Backend returns { data: { imageUrl: "/uploads/..." } }
-      // But our axios interceptor unwraps it, so we get { imageUrl: "/uploads/..." }
-      const imageUrl = response.data.imageUrl;
-      // Prepend base URL to make it a full URL
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://10.168.81.25:3000';
-      return `${baseURL}${imageUrl}`;
-    } catch (error) {
-      console.error('Failed to upload image', error);
-      throw error;
-    }
-  };
-
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
     try {
-      let imageUrl = formData.image;
-      if (selectedFile) {
-        imageUrl = await uploadImage(selectedFile);
-      }
-      const payload = {
+      await createProduct({
         name: formData.name,
         description: formData.description,
-        price: parseInt(formData.price),
+        price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
         categoryId: formData.categoryId,
-        imageUrl: imageUrl || "",
-      };
-      await api.post("/menu", payload);
+        file: selectedFile || undefined,
+        status: "AVAILABLE", // Default status
+      });
+      
       setIsAddOpen(false);
       resetForm();
       fetchData();
@@ -178,24 +191,26 @@ export default function ProductsPage() {
     if (!currentProduct) return;
     setFormLoading(true);
     try {
-      let imageUrl = formData.image;
-      if (selectedFile) {
-        imageUrl = await uploadImage(selectedFile);
-      }
-      const payload = {
+      await updateProduct(currentProduct.id, {
         name: formData.name,
         description: formData.description,
-        price: parseInt(formData.price),
+        price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
         categoryId: formData.categoryId,
-        imageUrl: imageUrl || "",
-      };
-      await api.patch(`/menu/${currentProduct.id}`, payload);
+        file: selectedFile || undefined,
+        imageUrl: formData.image, // Pass existing/manual URL if no file
+      });
+
       setIsEditOpen(false);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
         console.error("Failed to update product", error);
-        alert("Gagal memperbarui produk");
+        if (error.response?.data) {
+          console.error("Backend Error Details:", error.response.data);
+          alert(`Gagal memperbarui produk: ${error.response.data.message || JSON.stringify(error.response.data)}`);
+        } else {
+          alert("Gagal memperbarui produk");
+        }
     } finally {
         setFormLoading(false);
     }
@@ -272,7 +287,7 @@ export default function ProductsPage() {
                   <div className="aspect-square relative overflow-hidden bg-slate-100">
                     {product.imageUrl ? (
                       <img 
-                        src={product.imageUrl} 
+                        src={getValidImageUrl(product.imageUrl)} 
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         onError={(e) => {
@@ -304,7 +319,7 @@ export default function ProductsPage() {
                     </h3>
                     <div className="flex items-center justify-between mt-auto">
                       <div className="text-lg font-black text-foreground">
-                        {formatCurrency(product.price)}
+                        {formatCurrency(Number(product.price))}
                       </div>
                       <div className={`text-xs font-medium px-2 py-1 rounded-full ${product.stock < 10 ? 'bg-destructive/10 text-destructive' : 'bg-emerald-50 text-emerald-600'}`}>
                         Stok: {product.stock}
@@ -387,8 +402,6 @@ export default function ProductsPage() {
                    <Input id="imageFile" name="imageFile" type="file" accept="image/*" onChange={handleFileChange} className="cursor-pointer" />
                    <p className="text-xs text-muted-foreground">JPG, PNG, atau WebP (maks 5MB)</p>
                    {imagePreview && (<div className="flex gap-3 p-3 bg-muted rounded-lg"><img src={imagePreview} alt="Preview" className="w-20 h-20 object-cover rounded-md" /><span className="text-sm text-muted-foreground">Siap diunggah</span></div>)}
-                   <div className="relative"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground">ATAU</span></div></div>
-                   <div className="space-y-2"><Label htmlFor="image">URL Gambar</Label><Input id="image" name="image" type="url" value={formData.image} onChange={handleInputChange} placeholder="https://example.com/image.jpg" /><p className="text-xs text-muted-foreground">Tempel tautan langsung ke gambar</p></div>
                 </div>
              </div>
              <DialogFooter>
@@ -448,9 +461,7 @@ export default function ProductsPage() {
                 <div className="space-y-3">
                    <Input id="edit-imageFile" name="imageFile" type="file" accept="image/*" onChange={handleFileChange} className="cursor-pointer" />
                    <p className="text-xs text-muted-foreground">Unggah gambar baru (JPG, PNG, atau WebP)</p>
-                   {(imagePreview || formData.image) && (<div className="flex gap-3 p-3 bg-muted rounded-lg"><img src={imagePreview || formData.image} alt="Preview" className="w-20 h-20 object-cover rounded-md" /><span className="text-sm text-muted-foreground">{imagePreview ? "Gambar baru dipilih" : "Gambar saat ini"}</span></div>)}
-                   <div className="relative"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground">ATAU</span></div></div>
-                   <div className="space-y-2"><Label htmlFor="edit-image">URL Gambar</Label><Input id="edit-image" name="image" type="url" value={formData.image} onChange={handleInputChange} placeholder="https://example.com/image.jpg" /></div>
+                   {(imagePreview || formData.image) && (<div className="flex gap-3 p-3 bg-muted rounded-lg"><img src={imagePreview || getValidImageUrl(formData.image)} alt="Preview" className="w-20 h-20 object-cover rounded-md" /><span className="text-sm text-muted-foreground">{imagePreview ? "Gambar baru dipilih" : "Gambar saat ini"}</span></div>)}
                 </div>
              </div>
              <DialogFooter>
