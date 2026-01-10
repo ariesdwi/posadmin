@@ -2,7 +2,7 @@ import axios from "axios";
 import { getCookie, deleteCookie } from "cookies-next";
 
 // Default to Vercel backend
-const API_URL = "http://192.168.1.3:3000";
+const API_URL = "https://posbackend-18c9.vercel.app";
 
 const api = axios.create({
   baseURL: API_URL,

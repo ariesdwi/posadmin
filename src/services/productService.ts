@@ -90,3 +90,8 @@ export const updateProduct = async (id: number | string, data: Partial<ProductFo
   
   return api.patch(`/menu/${id}`, payload);
 };
+
+// 3. Delete Product (DELETE)
+export const deleteProduct = async (id: number | string) => {
+  return api.delete(`/menu/${id}`);
+};

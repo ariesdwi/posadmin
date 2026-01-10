@@ -11,34 +11,35 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Plus, Search, Edit, Trash2, Loader2, Package } from "lucide-react";
 import api from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
-import { createProduct, updateProduct } from "../../services/productService";
+import { createProduct, updateProduct, deleteProduct } from "../../services/productService";
 
 console.log('ProductService imported:', { createProduct, updateProduct });
 
 import { useAuth } from "@/context/AuthContext";
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   description?: string;
   price: number | string;
   stock: number;
-  categoryId: number;
+  categoryId: string;
   imageUrl?: string;
   category?: {
-    id: number;
+    id: string;
     name: string;
   };
 }
 
 interface Category {
-  id: number;
+  id: string;
   name: string;
 }
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  // ... (lines 42-220 unchanged) ...
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   
@@ -70,7 +71,7 @@ export default function ProductsPage() {
     // If it's a data URL (base64) or external (https://i.imgur...), return as is
     if (url.startsWith('data:') || url.startsWith('blob:')) return url;
     
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.3:3000'; // Current IP
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://posbackend-18c9.vercel.app'; // Current IP
     
     // If it's a relative path, prepend the current backend URL
     if (url.startsWith('/')) {
@@ -223,14 +224,20 @@ export default function ProductsPage() {
 
   const handleDeleteSubmit = async () => {
     if (!currentProduct) return;
+    console.log('Deleting product with ID:', currentProduct.id);
     setFormLoading(true);
     try {
-      await api.delete(`/menu/${currentProduct.id}`);
+      await deleteProduct(currentProduct.id);
       setIsDeleteOpen(false);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
         console.error("Failed to delete product", error);
-        alert("Gagal menghapus produk");
+        if (error.response?.data) {
+             console.error("Delete Error Details:", error.response.data);
+             alert(`Gagal menghapus produk: ${error.response.data.message || JSON.stringify(error.response.data)}`);
+        } else {
+             alert("Gagal menghapus produk");
+        }
     } finally {
         setFormLoading(false);
     }
