@@ -263,12 +263,12 @@ export default function ProductsPage() {
                 Kelola item menu dan inventaris toko Anda secara visual.
               </p>
             </div>
-            <Button onClick={() => { resetForm(); setIsAddOpen(true); }} className="shadow-lg shadow-primary/25 h-11 px-6 font-semibold">
+            <Button onClick={() => { resetForm(); setIsAddOpen(true); }} className="shadow-lg shadow-primary/25 h-11 px-6 font-semibold w-full md:w-auto">
               <Plus className="w-5 h-5 mr-2" /> Tambah Produk Baru
             </Button>
           </div>
 
-          <div className="flex items-center gap-4 bg-white p-2 pl-5 rounded-2xl border border-border shadow-sm max-w-2xl">
+          <div className="flex items-center gap-4 bg-white p-2 pl-5 rounded-2xl border border-border shadow-sm w-full md:max-w-2xl">
             <Search className="w-5 h-5 text-muted-foreground" />
             <Input 
               placeholder="Cari berdasarkan nama atau kategori..."
@@ -361,7 +361,7 @@ export default function ProductsPage() {
 
       {/* Add Product Dialog */}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto w-full max-w-lg md:max-w-xl">
           <DialogHeader>
             <DialogTitle>Tambah Produk Baru</DialogTitle>
             <DialogDescription>Buat item baru untuk menu Anda.</DialogDescription>
@@ -421,7 +421,7 @@ export default function ProductsPage() {
       
       {/* Edit Product Dialog */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto w-full max-w-lg md:max-w-xl">
           <DialogHeader>
             <DialogTitle>Edit Produk</DialogTitle>
              <DialogDescription>Perbarui rincian untuk {currentProduct?.name}</DialogDescription>

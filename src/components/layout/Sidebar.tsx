@@ -37,10 +37,11 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Mobile Menu Button - Aligned with Header */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-sidebar border border-sidebar-accent shadow-lg text-sidebar-foreground"
+        className="md:hidden fixed top-3 left-4 z-50 p-2 rounded-md hover:bg-accent/50 text-foreground transition-colors"
+        aria-label="Toggle Menu"
       >
         {isMobileMenuOpen ? (
           <X className="w-6 h-6" />
@@ -52,7 +53,7 @@ export default function Sidebar() {
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/50 z-30"
+          className="md:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40 transition-all duration-300"
           onClick={closeMobileMenu}
         />
       )}
@@ -60,23 +61,22 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-screen w-64 bg-sidebar border-r border-sidebar-accent z-40
-          transition-transform duration-300 ease-in-out
+          fixed top-0 left-0 h-screen w-64 bg-background border-r border-border z-50
+          transition-transform duration-300 ease-in-out shadow-xl md:shadow-none
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
           md:translate-x-0
         `}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full bg-card">
           {/* Logo/Brand */}
-          <div className="p-6 border-b border-sidebar-accent">
-            <h1 className="text-2xl font-bold text-white">
+          <div className="h-16 flex items-center px-6 border-b border-border">
+            <h1 className="text-xl font-bold text-primary tracking-tight">
               Admin POS
             </h1>
-            <p className="text-xs text-sidebar-foreground/60 mt-1">Manajemen Point of Sale</p>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
@@ -86,32 +86,32 @@ export default function Sidebar() {
                   href={item.href}
                   onClick={closeMobileMenu}
                   className={`
-                    flex items-center gap-3 px-4 py-3 rounded-lg transition-all
+                    flex items-center gap-3 px-3 py-2.5 rounded-md transition-all text-sm font-medium
                     ${
                       active
-                        ? "bg-sidebar-primary text-white shadow-lg shadow-sidebar-primary/20"
-                        : "text-sidebar-foreground/70 hover:bg-white/5 hover:text-white"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                     }
                   `}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.label}</span>
+                  <Icon className="w-4 h-4" />
+                  <span>{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
           {/* Logout Button */}
-          <div className="p-4 border-t border-sidebar-accent">
+          <div className="p-4 border-t border-border">
             <button
               onClick={() => {
                 closeMobileMenu();
                 logout();
               }}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sidebar-foreground/70 hover:bg-destructive/10 hover:text-destructive transition-all"
+              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all"
             >
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium">Keluar</span>
+              <LogOut className="w-4 h-4" />
+              <span>Keluar</span>
             </button>
           </div>
         </div>
