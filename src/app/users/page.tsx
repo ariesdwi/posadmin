@@ -16,7 +16,7 @@ interface UserData {
   id: number;
   email: string;
   name: string;
-  role: "ADMIN" | "KASIR";
+  role: "KASIR"; // Only show KASIR role in this page
 }
 
 export default function UsersPage() {
@@ -141,9 +141,12 @@ export default function UsersPage() {
     }
   };
 
+  // Filter to only show KASIR role users
   const filteredUsers = users.filter(u => 
-    u.name?.toLowerCase().includes(search.toLowerCase()) || 
-    u.email.toLowerCase().includes(search.toLowerCase())
+    u.role === 'KASIR' && (
+      u.name?.toLowerCase().includes(search.toLowerCase()) || 
+      u.email.toLowerCase().includes(search.toLowerCase())
+    )
   );
 
   return (
@@ -158,7 +161,7 @@ export default function UsersPage() {
                 Manajemen Pengguna
               </h1>
               <p className="text-muted-foreground mt-2">
-                Kelola akun admin dan kasir.
+                Kelola akun kasir.
               </p>
             </div>
             <Button onClick={() => { resetForm(); setIsAddOpen(true); }} className="shadow-lg shadow-primary/20">
@@ -213,8 +216,8 @@ export default function UsersPage() {
                             </div>
                         </TableCell>
                         <TableCell>
-                            <span className={`px-2 py-1 rounded-md text-xs font-medium ${user.role === 'ADMIN' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                                {user.role === 'ADMIN' ? 'Administrator' : 'Kasir'}
+                            <span className="px-2 py-1 rounded-md text-xs font-medium bg-emerald-100 text-emerald-700">
+                                Kasir
                             </span>
                         </TableCell>
                         <TableCell className="text-right">
@@ -242,7 +245,7 @@ export default function UsersPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Tambah Pengguna Baru</DialogTitle>
-            <DialogDescription>Buat akun baru untuk admin atau kasir.</DialogDescription>
+            <DialogDescription>Buat akun kasir baru.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAddSubmit} className="space-y-4 py-4">
              <div className="grid grid-cols-2 gap-4">
@@ -258,20 +261,8 @@ export default function UsersPage() {
                     <Label htmlFor="name">Nama Lengkap</Label>
                     <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required />
                 </div>
-                <div className="space-y-2 col-span-2">
-                    <Label htmlFor="role">Peran</Label>
-                    <select 
-                        id="role" 
-                        name="role" 
-                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        value={formData.role} 
-                        onChange={handleInputChange}
-                        required
-                    >
-                        <option value="KASIR">Kasir</option>
-                        <option value="ADMIN">Admin</option>
-                    </select>
-                </div>
+                {/* Role is fixed as KASIR */}
+                <input type="hidden" name="role" value="KASIR" />
              </div>
              <DialogFooter>
                 <Button type="button" variant="ghost" onClick={() => setIsAddOpen(false)}>Batal</Button>
@@ -304,19 +295,12 @@ export default function UsersPage() {
                 <Label htmlFor="edit-password">Kata Sandi (Kosongkan jika tidak ingin diubah)</Label>
                 <Input id="edit-password" name="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleInputChange} />
              </div>
+             {/* Display role as read-only */}
              <div className="space-y-2">
-                <Label htmlFor="edit-role">Peran</Label>
-                <select 
-                    id="edit-role" 
-                    name="role" 
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                    value={formData.role} 
-                    onChange={handleInputChange}
-                    required
-                >
-                    <option value="KASIR">Kasir</option>
-                    <option value="ADMIN">Administrator</option>
-                </select>
+                <Label>Peran</Label>
+                <div className="flex h-9 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm">
+                  <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-100 text-emerald-700">Kasir</span>
+                </div>
              </div>
              <DialogFooter>
                 <Button type="button" variant="ghost" onClick={() => setIsEditOpen(false)}>Batal</Button>
