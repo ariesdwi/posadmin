@@ -71,7 +71,7 @@ export default function ProductsPage() {
     // If it's a data URL (base64) or external (https://i.imgur...), return as is
     if (url.startsWith('data:') || url.startsWith('blob:')) return url;
     
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'; // Current IP
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://posbackend-18c9.vercel.app'; // Current IP
     
     // If it's a relative path, prepend the current backend URL
     if (url.startsWith('/')) {
