@@ -5,32 +5,27 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { 
   LayoutDashboard, 
-  Package, 
-  FolderOpen, 
-  Users, 
-  FileText, 
+  Building2,
+  Users,
   LogOut,
   X,
   Menu
 } from "lucide-react";
 import { useState } from "react";
 
-export default function Sidebar() {
+export default function AdminSidebar() {
   const pathname = usePathname();
   const { logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { href: "/", label: "Dasbor", icon: LayoutDashboard },
-    { href: "/products", label: "Produk", icon: Package },
-    { href: "/categories", label: "Kategori", icon: FolderOpen },
-    { href: "/users", label: "Pengguna", icon: Users },
-    { href: "/reports", label: "Laporan", icon: FileText },
+    { href: "/admin/dashboard", label: "System Dashboard", icon: LayoutDashboard },
+    { href: "/admin/businesses", label: "Businesses", icon: Building2 },
+    { href: "/admin/system-users", label: "System Users", icon: Users },
   ];
 
   const isActive = (href: string) => {
-    if (href === "/") return pathname === "/";
-    return pathname.startsWith(href);
+    return pathname === href || pathname.startsWith(href + '/');
   };
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
@@ -71,8 +66,11 @@ export default function Sidebar() {
           {/* Logo/Brand */}
           <div className="h-16 flex items-center px-6 border-b border-border">
             <h1 className="text-xl font-bold text-primary tracking-tight">
-              Admin POS
+              POS Admin
             </h1>
+            <span className="ml-2 px-2 py-0.5 text-xs font-semibold bg-primary/10 text-primary rounded">
+              SYSTEM
+            </span>
           </div>
 
           {/* Navigation */}

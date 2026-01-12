@@ -197,12 +197,14 @@ export default function ReportsPage() {
                         </div>
                     ) : (
                         <Tabs defaultValue="monthly" className="w-full">
-                            <TabsList className="grid w-full grid-cols-4 max-w-xl mb-8 bg-muted/50 p-1">
-                                <TabsTrigger value="daily" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">Harian</TabsTrigger>
-                                <TabsTrigger value="weekly" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">Mingguan</TabsTrigger>
-                                <TabsTrigger value="monthly" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">Bulanan</TabsTrigger>
-                                <TabsTrigger value="custom" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">Custom</TabsTrigger>
-                            </TabsList>
+                            <div className="overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
+                                <TabsList className="flex w-full md:grid md:grid-cols-4 max-w-xl mb-8 bg-muted/50 p-1 min-w-[320px]">
+                                    <TabsTrigger value="daily" className="flex-1 data-[state=active]:bg-background data-[state=active]:shadow-sm">Harian</TabsTrigger>
+                                    <TabsTrigger value="weekly" className="flex-1 data-[state=active]:bg-background data-[state=active]:shadow-sm">Mingguan</TabsTrigger>
+                                    <TabsTrigger value="monthly" className="flex-1 data-[state=active]:bg-background data-[state=active]:shadow-sm">Bulanan</TabsTrigger>
+                                    <TabsTrigger value="custom" className="flex-1 data-[state=active]:bg-background data-[state=active]:shadow-sm">Custom</TabsTrigger>
+                                </TabsList>
+                            </div>
 
                             <TabsContent value="daily" className="animate-fade-in space-y-6">
                                 <ReportHeader 
@@ -316,7 +318,7 @@ function ReportHeader({ title, subtitle, onDownload, loading, disabled }: any) {
                 onClick={onDownload}
                 disabled={disabled || loading}
                 variant="default"
-                className="bg-primary hover:bg-primary/90 text-white shadow-sm"
+                className="bg-primary hover:bg-primary/90 text-white shadow-sm w-full md:w-auto"
             >
                 {loading ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -444,16 +446,16 @@ function ReportContent({ data, type }: any) {
             </div>
 
             {/* Transactions Table */}
-            <Card className="shadow-sm border-border/50">
+            <Card className="shadow-sm border-border/50 overflow-hidden">
                 <CardHeader className="flex flex-row items-center justify-between">
                     <div>
                         <CardTitle>Riwayat Transaksi</CardTitle>
                         <CardDescription>Daftar transaksi rinci untuk periode ini</CardDescription>
                     </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-0 sm:p-6 overflow-x-auto">
                     {data.transactions && data.transactions.length > 0 ? (
-                        <Table>
+                        <Table className="min-w-[600px]">
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>No. Transaksi</TableHead>

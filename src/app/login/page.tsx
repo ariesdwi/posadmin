@@ -38,8 +38,9 @@ export default function LoginPage() {
         throw new Error("No user data received from server");
       }
       
-      if (user.role !== 'ADMIN') {
-          setError("Akses ditolak. Hanya Admin yang dapat mengakses portal ini.");
+      // Allow both ADMIN and BUSINESS_OWNER roles
+      if (user.role !== 'ADMIN' && user.role !== 'BUSINESS_OWNER') {
+          setError("Akses ditolak. Hanya Admin dan Business Owner yang dapat mengakses portal ini.");
           setIsLoading(false);
           return;
       }

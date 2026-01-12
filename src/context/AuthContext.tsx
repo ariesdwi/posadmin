@@ -8,8 +8,9 @@ import { useRouter } from "next/navigation";
 interface User {
   id: string | number;
   email: string;
-  role: "ADMIN" | "KASIR";
+  role: "ADMIN" | "BUSINESS_OWNER" | "KASIR";
   name?: string;
+  businessId?: string;
 }
 
 interface AuthContextType {
@@ -61,7 +62,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setCookie("token", token, { maxAge: 60 * 60 * 24 * 7 }); // 7 days
     setCookie("user", JSON.stringify(userData), { maxAge: 60 * 60 * 24 * 7 });
     setUser(userData);
-    router.push("/");
+    
+    // Role-based routing
+    if (userData.role === 'ADMIN') {
+      router.push('/admin/dashboard');
+    } else if (userData.role === 'BUSINESS_OWNER') {
+      router.push('/');
+    } else {
+      // KASIR - redirect to cashier/POS view (future)
+      router.push('/');
+    }
   };
 
   const logout = () => {
