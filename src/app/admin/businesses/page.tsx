@@ -29,6 +29,7 @@ export default function BusinessesPage() {
   
   // Modal States
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [currentBusiness, setCurrentBusiness] = useState<Business | null>(null);
   
@@ -98,6 +99,45 @@ export default function BusinessesPage() {
         alert(`Gagal membuat bisnis: ${error.response.data.message}`);
       } else {
         alert("Gagal membuat bisnis");
+      }
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleEditClick = (business: Business) => {
+    setCurrentBusiness(business);
+    setFormData({
+      businessName: business.name,
+      ownerEmail: "", // Not used in edit
+      ownerPassword: "", // Not used in edit
+      ownerName: "", // Not used in edit
+      address: business.address || "",
+      phone: business.phone || ""
+    });
+    setIsEditOpen(true);
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentBusiness) return;
+    setFormLoading(true);
+    try {
+      await api.patch(`/businesses/${currentBusiness.id}`, {
+        name: formData.businessName,
+        address: formData.address,
+        phone: formData.phone
+      });
+
+      setIsEditOpen(false);
+      resetForm();
+      fetchData();
+    } catch (error: any) {
+      console.error("Failed to update business", error);
+      if (error.response?.data?.message) {
+        alert(`Gagal memperbarui bisnis: ${error.response.data.message}`);
+      } else {
+        alert("Gagal memperbarui bisnis");
       }
     } finally {
       setFormLoading(false);
@@ -211,6 +251,9 @@ export default function BusinessesPage() {
                           <Eye className="w-4 h-4" />
                         </Button>
                       </Link>
+                      <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary" onClick={() => handleEditClick(business)}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
                       <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => handleDeleteClick(business)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -259,6 +302,40 @@ export default function BusinessesPage() {
               <Button type="submit" disabled={formLoading}>
                 {formLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                 Create Business
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Business Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto w-full max-w-lg md:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Update Business</DialogTitle>
+            <DialogDescription>Update details for {currentBusiness?.name}.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEditSubmit} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="editBusinessName">Business Name *</Label>
+              <Input id="editBusinessName" name="businessName" value={formData.businessName} onChange={handleInputChange} placeholder="Coffee Shop" required />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="editAddress">Address</Label>
+              <Input id="editAddress" name="address" value={formData.address} onChange={handleInputChange} placeholder="Jl. Example No. 123" />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="editPhone">Phone</Label>
+              <Input id="editPhone" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="08123456789" />
+            </div>
+            
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={formLoading}>
+                {formLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                Update Business
               </Button>
             </DialogFooter>
           </form>
