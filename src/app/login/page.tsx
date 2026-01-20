@@ -156,7 +156,8 @@ function LoginForm() {
               Masuk
             </Button>
 
-            <div className="relative w-full">
+            {/* Temporarily hidden Google OAuth login */}
+            {/* <div className="relative w-full">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border" />
               </div>
@@ -179,7 +180,7 @@ function LoginForm() {
                 size="large"
                 text="continue_with"
               />
-            </div>
+            </div> */}
           </CardFooter>
         </form>
       </Card>
