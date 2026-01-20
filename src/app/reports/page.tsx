@@ -202,6 +202,7 @@ export default function ReportsPage() {
                                     <TabsTrigger value="daily" className="flex-1 data-[state=active]:bg-background data-[state=active]:shadow-sm">Harian</TabsTrigger>
                                     <TabsTrigger value="weekly" className="flex-1 data-[state=active]:bg-background data-[state=active]:shadow-sm">Mingguan</TabsTrigger>
                                     <TabsTrigger value="monthly" className="flex-1 data-[state=active]:bg-background data-[state=active]:shadow-sm">Bulanan</TabsTrigger>
+                                    <TabsTrigger value="margin" className="flex-1 data-[state=active]:bg-background data-[state=active]:shadow-sm">Profitabilitas</TabsTrigger>
                                     <TabsTrigger value="custom" className="flex-1 data-[state=active]:bg-background data-[state=active]:shadow-sm">Custom</TabsTrigger>
                                 </TabsList>
                             </div>
@@ -237,6 +238,64 @@ export default function ReportsPage() {
                                     disabled={!data.monthly}
                                 />
                                 <ReportContent data={data.monthly} type="monthly" />
+                            </TabsContent>
+
+                            <TabsContent value="margin" className="animate-fade-in space-y-6">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Analisis Profitabilitas</CardTitle>
+                                        <CardDescription>Lihat rincian margin dan keuntungan dalam rentang waktu tertentu</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="flex flex-col md:flex-row gap-4 items-end">
+                                            <div className="grid w-full items-center gap-1.5">
+                                                <Label htmlFor="marginStartDate">Tanggal Mulai</Label>
+                                                <Input
+                                                    id="marginStartDate"
+                                                    type="date"
+                                                    value={startDate}
+                                                    onChange={(e) => setStartDate(e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="grid w-full items-center gap-1.5">
+                                                <Label htmlFor="marginEndDate">Tanggal Akhir</Label>
+                                                <Input
+                                                    id="marginEndDate"
+                                                    type="date"
+                                                    value={endDate}
+                                                    onChange={(e) => setEndDate(e.target.value)}
+                                                />
+                                            </div>
+                                            <Button 
+                                                onClick={async () => {
+                                                    if (!startDate || !endDate) {
+                                                        alert("Silakan pilih tanggal mulai dan tanggal akhir");
+                                                        return;
+                                                    }
+                                                    try {
+                                                        setCustomLoading(true);
+                                                        const res = await api.get(`/reports/margin?startDate=${startDate}&endDate=${endDate}`);
+                                                        setData(prev => ({ ...prev, custom: res.data }));
+                                                    } catch (err) {
+                                                        console.error(err);
+                                                        alert("Gagal memuat data margin");
+                                                    } finally {
+                                                        setCustomLoading(false);
+                                                    }
+                                                }}
+                                                disabled={customLoading}
+                                                className="w-full md:w-auto min-w-[140px]"
+                                            >
+                                                {customLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <TrendingUp className="w-4 h-4 mr-2" />}
+                                                Lihat Margin
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                {data.custom && (
+                                    <ReportContent data={data.custom} type="margin" />
+                                )}
                             </TabsContent>
 
                             <TabsContent value="custom" className="animate-fade-in space-y-6">
@@ -344,27 +403,36 @@ function ReportContent({ data, type }: any) {
     return (
         <div className="space-y-6">
             {/* Executive Summary Cards */}
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                 <SummaryCard 
                     title="Total Pendapatan" 
                     value={formatCurrency(summary.totalRevenue || 0)} 
                     icon={DollarSign} 
-                    trend="up" // Mocked trend
                     subtitle="Gross Revenue"
                 />
                 <SummaryCard 
-                    title="Total Transaksi" 
-                    value={summary.totalTransactions || 0} 
+                    title="Total Modal" 
+                    value={formatCurrency(summary.totalCost || 0)} 
                     icon={ShoppingBag} 
-                    trend="neutral"
-                    subtitle="Volume Penjualan"
+                    subtitle="Cost of Goods"
+                />
+                 <SummaryCard 
+                    title="Total Profit" 
+                    value={formatCurrency(summary.totalProfit || 0)} 
+                    icon={TrendingUp} 
+                    subtitle="Net Gain"
                 />
                 <SummaryCard 
-                    title="Nilai Rata-rata" 
-                    value={formatCurrency(summary.averageTransactionValue || 0)} 
-                    icon={CreditCard} 
-                    trend="up"
-                    subtitle="Per Customer"
+                    title="Margin Rata-rata" 
+                    value={`${Math.round(summary.averageMargin || 0)}%`} 
+                    icon={TrendingUp} 
+                    subtitle="Efficiency"
+                />
+                <SummaryCard 
+                    title="Transaksi" 
+                    value={summary.totalTransactions || 0} 
+                    icon={Users} 
+                    subtitle="Volume"
                 />
             </div>
 
@@ -424,7 +492,12 @@ function ReportContent({ data, type }: any) {
                                     <div className="flex-1 space-y-1">
                                         <div className="flex justify-between text-sm font-medium">
                                             <span>{item.productName}</span>
-                                            <span className="text-muted-foreground">{item.quantitySold} sold</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-bold text-emerald-600">
+                                                    {formatCurrency(item.profit || 0)} profit
+                                                </span>
+                                                <span className="text-muted-foreground">{item.quantitySold} sold</span>
+                                            </div>
                                         </div>
                                         <div className="h-2 w-full bg-secondary/20 rounded-full overflow-hidden">
                                             <div 

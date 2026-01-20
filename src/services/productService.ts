@@ -5,6 +5,7 @@ export interface ProductFormData {
   name: string;
   description?: string;
   price: number;
+  costPrice?: number;
   stock: number;
   categoryId: string;
   status?: 'AVAILABLE' | 'OUT_OF_STOCK';
@@ -59,6 +60,7 @@ export const createProduct = async (data: ProductFormData) => {
     name: data.name,
     description: data.description,
     price: data.price,
+    costPrice: data.costPrice,
     stock: data.stock,
     categoryId: data.categoryId,
     status: data.status,
@@ -83,6 +85,7 @@ export const updateProduct = async (id: number | string, data: Partial<ProductFo
   if (data.name) payload.name = data.name;
   if (data.description !== undefined) payload.description = data.description;
   if (data.price !== undefined) payload.price = data.price;
+  if (data.costPrice !== undefined) payload.costPrice = data.costPrice;
   if (data.stock !== undefined) payload.stock = data.stock;
   if (data.categoryId) payload.categoryId = data.categoryId;
   if (data.status) payload.status = data.status;

@@ -22,6 +22,7 @@ interface Product {
   name: string;
   description?: string;
   price: number | string;
+  costPrice?: number | string;
   stock: number;
   categoryId: string;
   imageUrl?: string;
@@ -54,6 +55,7 @@ export default function ProductsPage() {
     name: "",
     description: "",
     price: "",
+    costPrice: "",
     stock: "",
     categoryId: "",
     image: ""
@@ -128,6 +130,7 @@ export default function ProductsPage() {
       name: "",
       description: "",
       price: "",
+      costPrice: "",
       stock: "",
       categoryId: "",
       image: ""
@@ -157,6 +160,7 @@ export default function ProductsPage() {
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price),
+        costPrice: formData.costPrice ? parseFloat(formData.costPrice) : undefined,
         stock: parseInt(formData.stock),
         categoryId: formData.categoryId,
         file: selectedFile || undefined,
@@ -180,6 +184,7 @@ export default function ProductsPage() {
       name: product.name,
       description: product.description || "",
       price: String(product.price),
+      costPrice: String(product.costPrice || ""),
       stock: String(product.stock),
       categoryId: String(product.categoryId),
       image: product.imageUrl || ""
@@ -196,6 +201,7 @@ export default function ProductsPage() {
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price),
+        costPrice: formData.costPrice ? parseFloat(formData.costPrice) : undefined,
         stock: parseInt(formData.stock),
         categoryId: formData.categoryId,
         file: selectedFile || undefined,
@@ -328,8 +334,15 @@ export default function ProductsPage() {
                       <div className="text-lg font-black text-foreground">
                         {formatCurrency(Number(product.price))}
                       </div>
-                      <div className={`text-xs font-medium px-2 py-1 rounded-full ${product.stock < 10 ? 'bg-destructive/10 text-destructive' : 'bg-emerald-50 text-emerald-600'}`}>
-                        Stok: {product.stock}
+                      <div className="flex flex-col items-end gap-1">
+                        <div className={`text-xs font-medium px-2 py-1 rounded-full ${product.stock < 10 ? 'bg-destructive/10 text-destructive' : 'bg-emerald-50 text-emerald-600'}`}>
+                          Stok: {product.stock}
+                        </div>
+                        {user?.role !== 'KASIR' && product.costPrice && Number(product.price) > 0 && (
+                          <div className="text-[10px] font-bold text-emerald-600">
+                            Margin: {Math.round(((Number(product.price) - Number(product.costPrice)) / Number(product.price)) * 100)}%
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -393,9 +406,15 @@ export default function ProductsPage() {
                 <h3 className="text-sm font-semibold border-b pb-2">Harga & Inventaris</h3>
                 <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-2">
-                      <Label htmlFor="price">Harga (Rp) *</Label>
+                      <Label htmlFor="price">Harga Jual (Rp) *</Label>
                       <Input id="price" name="price" type="number" min="0" value={formData.price} onChange={handleInputChange} placeholder="25000" required />
                    </div>
+                   {user?.role !== 'KASIR' && (
+                     <div className="space-y-2">
+                        <Label htmlFor="costPrice">Harga Modal (Rp)</Label>
+                        <Input id="costPrice" name="costPrice" type="number" min="0" value={formData.costPrice} onChange={handleInputChange} placeholder="15000" />
+                     </div>
+                   )}
                    <div className="space-y-2">
                       <Label htmlFor="stock">Stok *</Label>
                       <Input id="stock" name="stock" type="number" min="0" value={formData.stock} onChange={handleInputChange} placeholder="50" required />
@@ -453,9 +472,15 @@ export default function ProductsPage() {
                 <h3 className="text-sm font-semibold border-b pb-2">Harga & Inventaris</h3>
                 <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-2">
-                      <Label htmlFor="edit-price">Harga (Rp) *</Label>
+                      <Label htmlFor="edit-price">Harga Jual (Rp) *</Label>
                       <Input id="edit-price" name="price" type="number" min="0" value={formData.price} onChange={handleInputChange} required />
                    </div>
+                   {user?.role !== 'KASIR' && (
+                     <div className="space-y-2">
+                        <Label htmlFor="edit-costPrice">Harga Modal (Rp)</Label>
+                        <Input id="edit-costPrice" name="costPrice" type="number" min="0" value={formData.costPrice} onChange={handleInputChange} />
+                     </div>
+                   )}
                    <div className="space-y-2">
                       <Label htmlFor="edit-stock">Stok *</Label>
                       <Input id="edit-stock" name="stock" type="number" min="0" value={formData.stock} onChange={handleInputChange} required />

@@ -2,14 +2,22 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { GoogleLogin } from "@react-oauth/google";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Store, Loader2 } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
-export default function LoginPage() {
+// Replace with your actual Google OAuth Client ID
+// You can get this from: https://console.cloud.google.com/apis/credentials
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -49,6 +57,36 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.message || err.message || "Kredensial tidak valid");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Google OAuth login handler
+  const handleGoogleOAuth = async (idToken: string) => {
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      const response = await api.post("/auth/google", { idToken });
+      
+      const { accessToken, user } = response.data;
+      
+      if (!accessToken || !user) {
+        throw new Error("Invalid response from server");
+      }
+      
+      // Allow both ADMIN and BUSINESS_OWNER roles
+      if (user.role !== 'ADMIN' && user.role !== 'BUSINESS_OWNER') {
+        setError("Akses ditolak. Hanya Admin dan Business Owner yang dapat mengakses portal ini.");
+        setIsLoading(false);
+        return;
+      }
+      
+      login(accessToken, user);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.message || "Google Sign-In gagal");
     } finally {
       setIsLoading(false);
     }
@@ -102,13 +140,46 @@ export default function LoginPage() {
                 required
                 className="bg-background border-border focus:ring-2 focus:ring-primary/20"
               />
+              <div className="text-right">
+                <Link 
+                  href="/forgot-password" 
+                  className="text-sm text-primary hover:underline font-medium"
+                >
+                  Lupa Kata Sandi?
+                </Link>
+              </div>
             </div>
           </CardContent>
-          <CardFooter className="pb-8">
+          <CardFooter className="flex flex-col space-y-4 pb-8">
             <Button className="w-full h-11 text-base font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all" type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
               Masuk
             </Button>
+
+            <div className="relative w-full">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Atau</span>
+              </div>
+            </div>
+
+            <div className="w-full flex justify-center">
+              <GoogleLogin
+                onSuccess={(credentialResponse) => {
+                  if (credentialResponse.credential) {
+                    handleGoogleOAuth(credentialResponse.credential);
+                  }
+                }}
+                onError={() => {
+                  setError("Google Sign-In gagal. Silakan coba lagi.");
+                }}
+                theme="outline"
+                size="large"
+                text="continue_with"
+              />
+            </div>
           </CardFooter>
         </form>
       </Card>
@@ -117,5 +188,13 @@ export default function LoginPage() {
         &copy; 2026 Sistem POS. Hak cipta dilindungi undang-undang.
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <LoginForm />
+    </GoogleOAuthProvider>
   );
 }
