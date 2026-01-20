@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ type PasswordStrength = {
   width: string;
 };
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [token, setToken] = useState("");
@@ -201,5 +201,29 @@ export default function ResetPasswordPage() {
         </form>
       </Card>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md shadow-2xl">
+          <CardHeader className="text-center pb-4">
+            <div className="flex justify-center mb-4">
+              <div className="p-6 rounded-full bg-primary/10">
+                <Loader2 className="w-16 h-16 text-primary animate-spin" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl">Loading...</CardTitle>
+            <CardDescription className="text-base mt-2">
+              Please wait...
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    }>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
