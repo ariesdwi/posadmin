@@ -58,13 +58,13 @@ const googleLogin = useGoogleLogin({
 Create `.env.local`:
 ```bash
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
-NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=https://posbackend-18c9.vercel.app
 ```
 
 ### 2. Google Cloud Console Setup
 1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
 2. Create OAuth 2.0 Client ID
-3. Add authorized origins: `http://localhost:3000`
+3. Add authorized origins: `https://posbackend-18c9.vercel.app`
 4. Copy Client ID to `.env.local`
 
 ### 3. Start Development
@@ -81,10 +81,10 @@ npm run dev
 - **Business Owner:** `owner@kedaikita.com` / `owner123`
 
 ### Test URLs
-- Login: http://localhost:3000/login
-- Email Verification: http://localhost:3000/verify-email?token=test
-- Forgot Password: http://localhost:3000/forgot-password
-- Reset Password: http://localhost:3000/reset-password?token=test
+- Login: https://posbackend-18c9.vercel.app/login
+- Email Verification: https://posbackend-18c9.vercel.app/verify-email?token=test
+- Forgot Password: https://posbackend-18c9.vercel.app/forgot-password
+- Reset Password: https://posbackend-18c9.vercel.app/reset-password?token=test
 
 ### Test Flows
 1. ✅ **Login Flow**

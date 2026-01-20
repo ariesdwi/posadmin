@@ -24,7 +24,7 @@ const GOOGLE_CLIENT_ID = "your-actual-client-id.apps.googleusercontent.com";
 #### Get Your Google Client ID:
 1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
 2. Create OAuth 2.0 Client ID
-3. Add authorized origins: `http://localhost:3000`
+3. Add authorized origins: `https://posbackend-18c9.vercel.app`
 4. Copy the Client ID
 
 ### 3. Start Development Server
@@ -35,10 +35,10 @@ npm run dev
 ### 4. Test the Features
 
 Visit these URLs to test:
-- **Login:** http://localhost:3000/login
-- **Email Verification:** http://localhost:3000/verify-email?token=test
-- **Forgot Password:** http://localhost:3000/forgot-password
-- **Reset Password:** http://localhost:3000/reset-password?token=test
+- **Login:** https://posbackend-18c9.vercel.app/login
+- **Email Verification:** https://posbackend-18c9.vercel.app/verify-email?token=test
+- **Forgot Password:** https://posbackend-18c9.vercel.app/forgot-password
+- **Reset Password:** https://posbackend-18c9.vercel.app/reset-password?token=test
 
 ---
 
