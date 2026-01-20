@@ -5,8 +5,11 @@ export function middleware(request: NextRequest) {
   const userCookie = request.cookies.get('user');
   const path = request.nextUrl.pathname;
   
-  // Allow login page always
-  if (path === '/login') {
+  // Public routes that don't require authentication
+  const publicRoutes = ['/login', '/verify-email', '/forgot-password', '/reset-password'];
+  
+  // Allow public routes
+  if (publicRoutes.includes(path)) {
     return NextResponse.next();
   }
   
