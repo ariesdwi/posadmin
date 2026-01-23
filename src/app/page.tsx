@@ -106,18 +106,7 @@ export default function Dashboard() {
                       icon={TrendingUp}
                       description="Bulan ini sejauh ini"
                    />
-                    <StatCard 
-                      title="Total Produk" 
-                      value="--" 
-                      icon={Package}
-                      description="Produk aktif"
-                   />
-                    <StatCard 
-                      title="Kasir Aktif" 
-                      value="--" 
-                      icon={Users}
-                      description="Anggota staf"
-                   />
+
                </div>
 
                 {/* Charts Area */}

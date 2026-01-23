@@ -42,8 +42,11 @@ import {
     CreditCard, 
     ShoppingBag, 
     Users,
-    FileText
+    FileText,
+    Trash2,
+    MoreVertical
 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface ReportData {
     daily: any;
@@ -68,6 +71,9 @@ export default function ReportsPage() {
     const [downloadLoading, setDownloadLoading] = useState(false);
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [transactionToDelete, setTransactionToDelete] = useState<any>(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     // Initialize dates
     const today = new Date().toISOString().split('T')[0];
@@ -174,6 +180,46 @@ export default function ReportsPage() {
         }
     };
 
+    const handleDeleteTransaction = async () => {
+        if (!transactionToDelete) return;
+
+        try {
+            setDeleteLoading(true);
+            await api.delete(`/transactions/${transactionToDelete.id}`);
+            
+            // Show success message
+            alert(`Transaction ${transactionToDelete.transactionNumber} deleted successfully`);
+            
+            // Refresh the current report data
+            const today = new Date().toISOString().split('T')[0];
+            const month = today.slice(0, 7);
+            const d = new Date();
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day == 0 ? -6 : 1);
+            const monday = new Date(d.setDate(diff)).toISOString().split('T')[0];
+
+            const [dailyRes, weeklyRes, monthlyRes] = await Promise.all([
+                api.get(`/reports/daily?date=${today}`).catch(e => ({ data: null })),
+                api.get(`/reports/weekly?startDate=${monday}`).catch(e => ({ data: null })),
+                api.get(`/reports/monthly?month=${month}`).catch(e => ({ data: null }))
+            ]);
+
+            setData(prev => ({
+                ...prev,
+                daily: dailyRes.data,
+                weekly: weeklyRes.data,
+                monthly: monthlyRes.data,
+            }));
+        } catch (err: any) {
+            console.error("Failed to delete transaction", err);
+            alert(err.response?.data?.message || "Failed to delete transaction. Please try again.");
+        } finally {
+            setDeleteLoading(false);
+            setDeleteDialogOpen(false);
+            setTransactionToDelete(null);
+        }
+    };
+
     return (
         <div className="flex bg-background min-h-screen">
             <Sidebar />
@@ -215,7 +261,14 @@ export default function ReportsPage() {
                                     loading={downloadLoading}
                                     disabled={!data.daily}
                                 />
-                                <ReportContent data={data.daily} type="daily" />
+                                <ReportContent 
+                                    data={data.daily} 
+                                    type="daily" 
+                                    onDeleteTransaction={(txn: any) => {
+                                        setTransactionToDelete(txn);
+                                        setDeleteDialogOpen(true);
+                                    }}
+                                />
                             </TabsContent>
 
                             <TabsContent value="weekly" className="animate-fade-in space-y-6">
@@ -226,7 +279,14 @@ export default function ReportsPage() {
                                     loading={downloadLoading}
                                     disabled={!data.weekly}
                                 />
-                                <ReportContent data={data.weekly} type="weekly" />
+                                <ReportContent 
+                                    data={data.weekly} 
+                                    type="weekly" 
+                                    onDeleteTransaction={(txn: any) => {
+                                        setTransactionToDelete(txn);
+                                        setDeleteDialogOpen(true);
+                                    }}
+                                />
                             </TabsContent>
 
                             <TabsContent value="monthly" className="animate-fade-in space-y-6">
@@ -237,7 +297,14 @@ export default function ReportsPage() {
                                     loading={downloadLoading}
                                     disabled={!data.monthly}
                                 />
-                                <ReportContent data={data.monthly} type="monthly" />
+                                <ReportContent 
+                                    data={data.monthly} 
+                                    type="monthly" 
+                                    onDeleteTransaction={(txn: any) => {
+                                        setTransactionToDelete(txn);
+                                        setDeleteDialogOpen(true);
+                                    }}
+                                />
                             </TabsContent>
 
                             <TabsContent value="margin" className="animate-fade-in space-y-6">
@@ -294,7 +361,14 @@ export default function ReportsPage() {
                                 </Card>
 
                                 {data.custom && (
-                                    <ReportContent data={data.custom} type="margin" />
+                                    <ReportContent 
+                                        data={data.custom} 
+                                        type="margin" 
+                                        onDeleteTransaction={(txn: any) => {
+                                            setTransactionToDelete(txn);
+                                            setDeleteDialogOpen(true);
+                                        }}
+                                    />
                                 )}
                             </TabsContent>
 
@@ -354,7 +428,14 @@ export default function ReportsPage() {
                                                 Download PDF
                                             </Button>
                                         </div>
-                                        <ReportContent data={data.custom} type="custom" />
+                                        <ReportContent 
+                                            data={data.custom} 
+                                            type="custom" 
+                                            onDeleteTransaction={(txn: any) => {
+                                                setTransactionToDelete(txn);
+                                                setDeleteDialogOpen(true);
+                                            }}
+                                        />
                                     </>
                                 )}
                             </TabsContent>
@@ -362,6 +443,37 @@ export default function ReportsPage() {
                     )}
                 </main>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Delete Transaction</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete transaction <strong>{transactionToDelete?.transactionNumber}</strong>?
+                            <br />
+                            <span className="text-foreground font-semibold mt-2 inline-block">
+                                Amount: {transactionToDelete && formatCurrency(transactionToDelete.totalAmount)}
+                            </span>
+                            <p className="mt-3 font-semibold text-destructive">This action cannot be undone!</p>
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button type="button" variant="ghost" onClick={() => setDeleteDialogOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button 
+                            type="button" 
+                            variant="destructive" 
+                            onClick={handleDeleteTransaction} 
+                            disabled={deleteLoading}
+                        >
+                            {deleteLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                            Delete Permanently
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
@@ -390,7 +502,7 @@ function ReportHeader({ title, subtitle, onDownload, loading, disabled }: any) {
     );
 }
 
-function ReportContent({ data, type }: any) {
+function ReportContent({ data, type, onDeleteTransaction }: any) {
     if (!data) return <EmptyState />;
 
     const { summary } = data;
@@ -537,6 +649,7 @@ function ReportContent({ data, type }: any) {
                                     <TableHead>Metode</TableHead>
                                     <TableHead>Items</TableHead>
                                     <TableHead className="text-right">Total</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -558,6 +671,16 @@ function ReportContent({ data, type }: any) {
                                         <TableCell>{txn.itemCount}</TableCell>
                                         <TableCell className="text-right font-bold text-foreground">
                                             {formatCurrency(txn.totalAmount)}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                onClick={() => onDeleteTransaction(txn)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
