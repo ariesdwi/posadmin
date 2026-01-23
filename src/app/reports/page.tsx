@@ -44,7 +44,8 @@ import {
     Users,
     FileText,
     Trash2,
-    MoreVertical
+    MoreVertical,
+    Eye
 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -74,6 +75,11 @@ export default function ReportsPage() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [transactionToDelete, setTransactionToDelete] = useState<any>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    
+    // Details Modal State
+    const [detailsOpen, setDetailsOpen] = useState(false);
+    const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+    const [detailsLoading, setDetailsLoading] = useState(false);
 
     // Initialize dates
     const today = new Date().toISOString().split('T')[0];
@@ -180,6 +186,23 @@ export default function ReportsPage() {
         }
     };
 
+    const handleViewDetails = async (txn: any) => {
+        try {
+            setDetailsLoading(true);
+            setSelectedTransaction(txn);
+            setDetailsOpen(true);
+            
+            // Fetch fresh details with items
+            const response = await api.get(`/transactions/${txn.id}`);
+            setSelectedTransaction(response.data);
+        } catch (err) {
+            console.error("Failed to fetch transaction details", err);
+            // We still show the partial data from the list
+        } finally {
+            setDetailsLoading(false);
+        }
+    };
+
     const handleDeleteTransaction = async () => {
         if (!transactionToDelete) return;
 
@@ -268,6 +291,7 @@ export default function ReportsPage() {
                                         setTransactionToDelete(txn);
                                         setDeleteDialogOpen(true);
                                     }}
+                                    onViewDetails={handleViewDetails}
                                 />
                             </TabsContent>
 
@@ -286,6 +310,7 @@ export default function ReportsPage() {
                                         setTransactionToDelete(txn);
                                         setDeleteDialogOpen(true);
                                     }}
+                                    onViewDetails={handleViewDetails}
                                 />
                             </TabsContent>
 
@@ -304,6 +329,7 @@ export default function ReportsPage() {
                                         setTransactionToDelete(txn);
                                         setDeleteDialogOpen(true);
                                     }}
+                                    onViewDetails={handleViewDetails}
                                 />
                             </TabsContent>
 
@@ -368,6 +394,7 @@ export default function ReportsPage() {
                                             setTransactionToDelete(txn);
                                             setDeleteDialogOpen(true);
                                         }}
+                                        onViewDetails={handleViewDetails}
                                     />
                                 )}
                             </TabsContent>
@@ -435,6 +462,7 @@ export default function ReportsPage() {
                                                 setTransactionToDelete(txn);
                                                 setDeleteDialogOpen(true);
                                             }}
+                                            onViewDetails={handleViewDetails}
                                         />
                                     </>
                                 )}
@@ -474,6 +502,89 @@ export default function ReportsPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Transaction Details Dialog */}
+            <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <FileText className="w-5 h-5 text-primary" />
+                            Detail Transaksi {selectedTransaction?.transactionNumber}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Rincian item dan pembayaran untuk transaksi ini.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {detailsLoading && !selectedTransaction?.items ? (
+                        <div className="py-12 flex items-center justify-center">
+                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                        </div>
+                    ) : (
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg text-sm">
+                                <div>
+                                    <p className="text-muted-foreground">Tanggal</p>
+                                    <p className="font-medium">{selectedTransaction && new Date(selectedTransaction.createdAt).toLocaleString('id-ID')}</p>
+                                </div>
+                                <div>
+                                    <p className="text-muted-foreground">Kasir</p>
+                                    <p className="font-medium">{selectedTransaction?.cashier || selectedTransaction?.user?.name}</p>
+                                </div>
+                                <div>
+                                    <p className="text-muted-foreground">Metode</p>
+                                    <p className="font-medium">{selectedTransaction?.paymentMethod}</p>
+                                </div>
+                                <div>
+                                    <p className="text-muted-foreground">Status</p>
+                                    <p className="font-medium text-emerald-600">{selectedTransaction?.status}</p>
+                                </div>
+                            </div>
+
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Produk</TableHead>
+                                        <TableHead className="text-center">Jumlah</TableHead>
+                                        <TableHead className="text-right">Harga</TableHead>
+                                        <TableHead className="text-right">Subtotal</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {selectedTransaction?.items?.map((item: any) => (
+                                        <TableRow key={item.id}>
+                                            <TableCell className="font-medium">{item.productName}</TableCell>
+                                            <TableCell className="text-center">{item.quantity}</TableCell>
+                                            <TableCell className="text-right">{formatCurrency(item.price)}</TableCell>
+                                            <TableCell className="text-right font-semibold">{formatCurrency(item.subtotal)}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+
+                            <div className="flex flex-col items-end space-y-2 pt-4 border-t">
+                                <div className="flex justify-between w-full max-w-[200px] text-sm italic text-muted-foreground">
+                                    <span>Total:</span>
+                                    <span>{selectedTransaction && formatCurrency(selectedTransaction.totalAmount)}</span>
+                                </div>
+                                <div className="flex justify-between w-full max-w-[200px] text-sm">
+                                    <span>Bayar:</span>
+                                    <span>{selectedTransaction && formatCurrency(selectedTransaction.paymentAmount || selectedTransaction.totalAmount)}</span>
+                                </div>
+                                <div className="flex justify-between w-full max-w-[200px] font-bold text-lg border-t pt-2">
+                                    <span>Kembali:</span>
+                                    <span>{selectedTransaction && formatCurrency(selectedTransaction.changeAmount || 0)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setDetailsOpen(false)}>
+                            Tutup
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
@@ -502,7 +613,7 @@ function ReportHeader({ title, subtitle, onDownload, loading, disabled }: any) {
     );
 }
 
-function ReportContent({ data, type, onDeleteTransaction }: any) {
+function ReportContent({ data, type, onDeleteTransaction, onViewDetails }: any) {
     if (!data) return <EmptyState />;
 
     const { summary } = data;
@@ -673,14 +784,24 @@ function ReportContent({ data, type, onDeleteTransaction }: any) {
                                             {formatCurrency(txn.totalAmount)}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                                onClick={() => onDeleteTransaction(txn)}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                                            <div className="flex justify-end gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
+                                                    onClick={() => onViewDetails(txn)}
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                    onClick={() => onDeleteTransaction(txn)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}
