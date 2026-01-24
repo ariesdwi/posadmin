@@ -246,9 +246,9 @@ export default function ReportsPage() {
     return (
         <div className="flex bg-background min-h-screen">
             <Sidebar />
-            <div className="flex-1 md:ml-64 flex flex-col">
+            <div className="flex-1 md:ml-64 flex flex-col overflow-x-hidden min-w-0">
                 <Header />
-                <main className="flex-1 p-8 space-y-8 overflow-y-auto">
+                <main className="flex-1 p-4 sm:p-8 space-y-6 sm:space-y-8 overflow-y-auto min-w-0">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -266,13 +266,13 @@ export default function ReportsPage() {
                         </div>
                     ) : (
                         <Tabs defaultValue="monthly" className="w-full">
-                            <div className="overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-                                <TabsList className="flex w-full md:grid md:grid-cols-4 max-w-xl mb-8 bg-muted/50 p-1 min-w-[320px]">
-                                    <TabsTrigger value="daily" className="flex-1 data-[state=active]:bg-background data-[state=active]:shadow-sm">Harian</TabsTrigger>
-                                    <TabsTrigger value="weekly" className="flex-1 data-[state=active]:bg-background data-[state=active]:shadow-sm">Mingguan</TabsTrigger>
-                                    <TabsTrigger value="monthly" className="flex-1 data-[state=active]:bg-background data-[state=active]:shadow-sm">Bulanan</TabsTrigger>
-                                    <TabsTrigger value="margin" className="flex-1 data-[state=active]:bg-background data-[state=active]:shadow-sm">Profitabilitas</TabsTrigger>
-                                    <TabsTrigger value="custom" className="flex-1 data-[state=active]:bg-background data-[state=active]:shadow-sm">Custom</TabsTrigger>
+                            <div className="overflow-x-auto pb-2 max-w-full">
+                                <TabsList className="inline-flex md:grid md:grid-cols-5 mb-8 bg-muted/50 p-1">
+                                    <TabsTrigger value="daily" className="flex-shrink-0 px-3 data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">Harian</TabsTrigger>
+                                    <TabsTrigger value="weekly" className="flex-shrink-0 px-3 data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">Mingguan</TabsTrigger>
+                                    <TabsTrigger value="monthly" className="flex-shrink-0 px-3 data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">Bulanan</TabsTrigger>
+                                    <TabsTrigger value="margin" className="flex-shrink-0 px-3 data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">Profitabilitas</TabsTrigger>
+                                    <TabsTrigger value="custom" className="flex-shrink-0 px-3 data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">Custom</TabsTrigger>
                                 </TabsList>
                             </div>
 
@@ -505,13 +505,13 @@ export default function ReportsPage() {
 
             {/* Transaction Details Dialog */}
             <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <FileText className="w-5 h-5 text-primary" />
-                            Detail Transaksi {selectedTransaction?.transactionNumber}
+                <DialogContent className="max-w-[95vw] sm:max-w-2xl lg:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+                    <DialogHeader className="space-y-2 pb-4">
+                        <DialogTitle className="flex items-center gap-2 text-base sm:text-lg pr-8">
+                            <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                            <span className="truncate">Detail Transaksi {selectedTransaction?.transactionNumber}</span>
                         </DialogTitle>
-                        <DialogDescription>
+                        <DialogDescription className="text-xs sm:text-sm">
                             Rincian item dan pembayaran untuk transaksi ini.
                         </DialogDescription>
                     </DialogHeader>
@@ -521,65 +521,95 @@ export default function ReportsPage() {
                             <Loader2 className="w-8 h-8 animate-spin text-primary" />
                         </div>
                     ) : (
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg text-sm">
-                                <div>
-                                    <p className="text-muted-foreground">Tanggal</p>
-                                    <p className="font-medium">{selectedTransaction && new Date(selectedTransaction.createdAt).toLocaleString('id-ID')}</p>
+                        <div className="space-y-4 sm:space-y-6">
+                            {/* Transaction Info Grid */}
+                            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 p-3 sm:p-4 bg-muted/30 rounded-lg">
+                                <div className="space-y-1">
+                                    <p className="text-muted-foreground text-[10px] sm:text-xs font-medium">Tanggal</p>
+                                    <p className="font-medium text-xs sm:text-sm leading-tight">
+                                        {selectedTransaction && new Date(selectedTransaction.createdAt).toLocaleDateString('id-ID', { 
+                                            day: '2-digit', 
+                                            month: 'short',
+                                            year: 'numeric'
+                                        })}
+                                    </p>
+                                    <p className="text-[10px] sm:text-xs text-muted-foreground">
+                                        {selectedTransaction && new Date(selectedTransaction.createdAt).toLocaleTimeString('id-ID', {
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </p>
                                 </div>
-                                <div>
-                                    <p className="text-muted-foreground">Kasir</p>
-                                    <p className="font-medium">{selectedTransaction?.cashier || selectedTransaction?.user?.name}</p>
+                                <div className="space-y-1">
+                                    <p className="text-muted-foreground text-[10px] sm:text-xs font-medium">Kasir</p>
+                                    <p className="font-medium text-xs sm:text-sm truncate" title={selectedTransaction?.cashier || selectedTransaction?.user?.name}>
+                                        {selectedTransaction?.cashier || selectedTransaction?.user?.name}
+                                    </p>
                                 </div>
-                                <div>
-                                    <p className="text-muted-foreground">Metode</p>
-                                    <p className="font-medium">{selectedTransaction?.paymentMethod}</p>
+                                <div className="space-y-1">
+                                    <p className="text-muted-foreground text-[10px] sm:text-xs font-medium">Metode</p>
+                                    <p className="font-medium text-xs sm:text-sm">{selectedTransaction?.paymentMethod}</p>
                                 </div>
-                                <div>
-                                    <p className="text-muted-foreground">Status</p>
-                                    <p className="font-medium text-emerald-600">{selectedTransaction?.status}</p>
+                                <div className="space-y-1">
+                                    <p className="text-muted-foreground text-[10px] sm:text-xs font-medium">Status</p>
+                                    <p className="font-medium text-emerald-600 text-xs sm:text-sm">{selectedTransaction?.status}</p>
                                 </div>
                             </div>
 
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Produk</TableHead>
-                                        <TableHead className="text-center">Jumlah</TableHead>
-                                        <TableHead className="text-right">Harga</TableHead>
-                                        <TableHead className="text-right">Subtotal</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {selectedTransaction?.items?.map((item: any) => (
-                                        <TableRow key={item.id}>
-                                            <TableCell className="font-medium">{item.productName}</TableCell>
-                                            <TableCell className="text-center">{item.quantity}</TableCell>
-                                            <TableCell className="text-right">{formatCurrency(item.price)}</TableCell>
-                                            <TableCell className="text-right font-semibold">{formatCurrency(item.subtotal)}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                            {/* Items Table */}
+                            <div>
+                                <h3 className="text-sm font-semibold mb-2 px-1">Item Transaksi</h3>
+                                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                                    <div className="inline-block min-w-full align-middle">
+                                        <Table className="min-w-full">
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead className="text-xs sm:text-sm px-2 sm:px-4">Produk</TableHead>
+                                                    <TableHead className="text-center text-xs sm:text-sm px-2 sm:px-4 w-16 sm:w-20">Qty</TableHead>
+                                                    <TableHead className="text-right text-xs sm:text-sm px-2 sm:px-4">Harga</TableHead>
+                                                    <TableHead className="text-right text-xs sm:text-sm px-2 sm:px-4">Subtotal</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {selectedTransaction?.items?.map((item: any) => (
+                                                    <TableRow key={item.id}>
+                                                        <TableCell className="font-medium text-xs sm:text-sm px-2 sm:px-4 max-w-[120px] sm:max-w-none">
+                                                            <span className="line-clamp-2 sm:line-clamp-1">{item.productName}</span>
+                                                        </TableCell>
+                                                        <TableCell className="text-center text-xs sm:text-sm px-2 sm:px-4">{item.quantity}</TableCell>
+                                                        <TableCell className="text-right whitespace-nowrap text-xs sm:text-sm px-2 sm:px-4">
+                                                            {formatCurrency(item.price)}
+                                                        </TableCell>
+                                                        <TableCell className="text-right font-semibold whitespace-nowrap text-xs sm:text-sm px-2 sm:px-4">
+                                                            {formatCurrency(item.subtotal)}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <div className="flex flex-col items-end space-y-2 pt-4 border-t">
-                                <div className="flex justify-between w-full max-w-[200px] text-sm italic text-muted-foreground">
+                            {/* Payment Summary */}
+                            <div className="flex flex-col items-end space-y-2 pt-4 border-t px-1 sm:px-0">
+                                <div className="flex justify-between w-full sm:max-w-[240px] text-xs sm:text-sm text-muted-foreground">
                                     <span>Total:</span>
-                                    <span>{selectedTransaction && formatCurrency(selectedTransaction.totalAmount)}</span>
+                                    <span className="font-medium">{selectedTransaction && formatCurrency(selectedTransaction.totalAmount)}</span>
                                 </div>
-                                <div className="flex justify-between w-full max-w-[200px] text-sm">
+                                <div className="flex justify-between w-full sm:max-w-[240px] text-xs sm:text-sm">
                                     <span>Bayar:</span>
-                                    <span>{selectedTransaction && formatCurrency(selectedTransaction.paymentAmount || selectedTransaction.totalAmount)}</span>
+                                    <span className="font-medium">{selectedTransaction && formatCurrency(selectedTransaction.paymentAmount || selectedTransaction.totalAmount)}</span>
                                 </div>
-                                <div className="flex justify-between w-full max-w-[200px] font-bold text-lg border-t pt-2">
+                                <div className="flex justify-between w-full sm:max-w-[240px] font-bold text-sm sm:text-base border-t pt-2 mt-1">
                                     <span>Kembali:</span>
-                                    <span>{selectedTransaction && formatCurrency(selectedTransaction.changeAmount || 0)}</span>
+                                    <span className="text-emerald-600">{selectedTransaction && formatCurrency(selectedTransaction.changeAmount || 0)}</span>
                                 </div>
                             </div>
                         </div>
                     )}
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setDetailsOpen(false)}>
+                    <DialogFooter className="mt-6 sm:mt-4">
+                        <Button type="button" variant="outline" onClick={() => setDetailsOpen(false)} className="w-full sm:w-auto">
                             Tutup
                         </Button>
                     </DialogFooter>
@@ -626,7 +656,7 @@ function ReportContent({ data, type, onDeleteTransaction, onViewDetails }: any) 
     return (
         <div className="space-y-6">
             {/* Executive Summary Cards */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                 <SummaryCard 
                     title="Total Pendapatan" 
                     value={formatCurrency(summary.totalRevenue || 0)} 
@@ -659,14 +689,14 @@ function ReportContent({ data, type, onDeleteTransaction, onViewDetails }: any) 
                 />
             </div>
 
-            <div className="grid gap-6 md:grid-cols-7">
+            <div className="grid gap-6 grid-cols-1 lg:grid-cols-7">
                 {/* Main Charts Area */}
-                <Card className="md:col-span-4 shadow-sm border-border/50">
+                <Card className="lg:col-span-4 shadow-sm border-border/50">
                     <CardHeader>
                         <CardTitle>Analisis Metode Pembayaran</CardTitle>
                         <CardDescription>Distribusi pendapatan berdasarkan metode pembayaran</CardDescription>
                     </CardHeader>
-                    <CardContent className="h-[300px] flex items-center justify-center">
+                    <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
                         {paymentData.length > 0 ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
@@ -697,7 +727,7 @@ function ReportContent({ data, type, onDeleteTransaction, onViewDetails }: any) 
                 </Card>
 
                 {/* Top Products */}
-                <Card className="md:col-span-3 shadow-sm border-border/50">
+                <Card className="lg:col-span-3 shadow-sm border-border/50">
                     <CardHeader>
                         <CardTitle>Produk Terlaris</CardTitle>
                         <CardDescription>Top 5 produk dengan performa terbaik</CardDescription>
@@ -712,10 +742,10 @@ function ReportContent({ data, type, onDeleteTransaction, onViewDetails }: any) 
                                     `}>
                                         {i + 1}
                                     </div>
-                                    <div className="flex-1 space-y-1">
-                                        <div className="flex justify-between text-sm font-medium">
-                                            <span>{item.productName}</span>
-                                            <div className="flex items-center gap-2">
+                                    <div className="flex-1 space-y-1 min-w-0">
+                                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 text-sm font-medium">
+                                            <span className="truncate">{item.productName}</span>
+                                            <div className="flex items-center gap-2 flex-shrink-0">
                                                 <span className="text-[10px] font-bold text-emerald-600">
                                                     {formatCurrency(item.profit || 0)} profit
                                                 </span>
@@ -749,8 +779,9 @@ function ReportContent({ data, type, onDeleteTransaction, onViewDetails }: any) 
                         <CardDescription>Daftar transaksi rinci untuk periode ini</CardDescription>
                     </div>
                 </CardHeader>
-                <CardContent className="p-0 sm:p-6 overflow-x-auto">
+                <CardContent className="p-0 overflow-x-auto">
                     {data.transactions && data.transactions.length > 0 ? (
+                        <div className="overflow-x-auto">
                         <Table className="min-w-[600px]">
                             <TableHeader>
                                 <TableRow>
@@ -767,7 +798,7 @@ function ReportContent({ data, type, onDeleteTransaction, onViewDetails }: any) 
                                 {data.transactions.slice(0, 10).map((txn: any) => (
                                     <TableRow key={txn.id} className="hover:bg-muted/50">
                                         <TableCell className="font-medium">{txn.transactionNumber}</TableCell>
-                                        <TableCell>
+                                        <TableCell className="whitespace-nowrap">
                                             <div className="flex flex-col">
                                                 <span>{new Date(txn.createdAt).toLocaleDateString()}</span>
                                                 <span className="text-xs text-muted-foreground">{new Date(txn.createdAt).toLocaleTimeString()}</span>
@@ -783,7 +814,7 @@ function ReportContent({ data, type, onDeleteTransaction, onViewDetails }: any) 
                                         <TableCell className="text-right font-bold text-foreground">
                                             {formatCurrency(txn.totalAmount)}
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-right whitespace-nowrap">
                                             <div className="flex justify-end gap-2">
                                                 <Button
                                                     variant="ghost"
@@ -807,6 +838,7 @@ function ReportContent({ data, type, onDeleteTransaction, onViewDetails }: any) 
                                 ))}
                             </TableBody>
                         </Table>
+                        </div>
                     ) : (
                         <div className="py-12 flex flex-col items-center justify-center text-center text-muted-foreground">
                             <ShoppingBag className="w-12 h-12 mb-4 opacity-20" />
