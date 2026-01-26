@@ -9,6 +9,7 @@ import {
   FolderOpen, 
   Users, 
   FileText, 
+  ReceiptText,
   LogOut,
   X,
   Menu
@@ -25,6 +26,7 @@ export default function Sidebar() {
     { href: "/products", label: "Produk", icon: Package },
     { href: "/categories", label: "Kategori", icon: FolderOpen },
     { href: "/users", label: "Pengguna", icon: Users },
+    { href: "/transactions", label: "Transaksi", icon: ReceiptText },
     { href: "/reports", label: "Laporan", icon: FileText },
   ];
 
