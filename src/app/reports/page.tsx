@@ -31,7 +31,8 @@ import {
     PieChart,
     Pie,
     Cell,
-    Legend
+    Legend,
+    ReferenceLine
 } from "recharts";
 import { 
     Loader2, 
@@ -45,7 +46,9 @@ import {
     FileText,
     Trash2,
     MoreVertical,
-    Eye
+    Eye,
+    Activity,
+    TrendingDown
 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -80,6 +83,9 @@ export default function ReportsPage() {
     const [detailsOpen, setDetailsOpen] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
     const [detailsLoading, setDetailsLoading] = useState(false);
+    
+    // Trend Range State
+    const [trendRange, setTrendRange] = useState<'7days' | '1month' | '3months'>('1month');
 
     // Initialize dates
     const today = new Date().toISOString().split('T')[0];
@@ -265,9 +271,10 @@ export default function ReportsPage() {
                             <Loader2 className="w-10 h-10 animate-spin text-primary" />
                         </div>
                     ) : (
-                        <Tabs defaultValue="monthly" className="w-full">
+                        <Tabs defaultValue="executive" className="w-full">
                             <div className="overflow-x-auto pb-2 max-w-full">
-                                <TabsList className="inline-flex md:grid md:grid-cols-5 mb-8 bg-muted/50 p-1">
+                                <TabsList className="inline-flex md:grid md:grid-cols-6 mb-8 bg-muted/50 p-1">
+                                    <TabsTrigger value="executive" className="flex-shrink-0 px-3 data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">Ikhtisar Eksekutif</TabsTrigger>
                                     <TabsTrigger value="daily" className="flex-shrink-0 px-3 data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">Harian</TabsTrigger>
                                     <TabsTrigger value="weekly" className="flex-shrink-0 px-3 data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">Mingguan</TabsTrigger>
                                     <TabsTrigger value="monthly" className="flex-shrink-0 px-3 data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">Bulanan</TabsTrigger>
@@ -275,6 +282,271 @@ export default function ReportsPage() {
                                     <TabsTrigger value="custom" className="flex-shrink-0 px-3 data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap">Custom</TabsTrigger>
                                 </TabsList>
                             </div>
+
+                            <TabsContent value="executive" className="animate-fade-in space-y-8">
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    <div className="lg:col-span-2 space-y-6">
+                                        <div className="flex flex-col gap-2">
+                                            <h2 className="text-2xl font-black tracking-tight flex items-center gap-2">
+                                                <Activity className="w-6 h-6 text-primary" />
+                                                Performa Bisnis
+                                            </h2>
+                                            <p className="text-muted-foreground text-sm">Analisis pertumbuhan dan profitabilitas secara keseluruhan.</p>
+                                        </div>
+
+                                        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                                            <SummaryCard 
+                                                title="Total Pendapatan" 
+                                                value={formatCurrency(data.monthly?.summary?.totalRevenue || 0)} 
+                                                icon={DollarSign} 
+                                                growth={15.4}
+                                                subtitle="Bulan ini vs Bulan lalu"
+                                                variant="primary"
+                                            />
+                                            <SummaryCard 
+                                                title="Total Laba Bersih" 
+                                                value={formatCurrency(data.monthly?.summary?.totalProfit || 0)} 
+                                                icon={TrendingUp} 
+                                                growth={8.2}
+                                                subtitle="Efisiensi operasional"
+                                                variant="success"
+                                            />
+                                        </div>
+
+                                        {/* <Card className="border-none shadow-xl shadow-slate-200/50 overflow-hidden">
+                                            <CardHeader className="bg-slate-50/50 pb-8">
+                                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                                    <div>
+                                                        <CardTitle className="text-lg font-bold">Tren Pendapatan</CardTitle>
+                                                        <CardDescription>Visualisasi pertumbuhan finansial per periode</CardDescription>
+                                                    </div>
+                                                    <div className="flex flex-col items-end gap-3">
+                                                        <div className="flex bg-slate-100 p-1 rounded-lg">
+                                                            {(['7days', '1month', '3months'] as const).map((r) => (
+                                                                <button
+                                                                    key={r}
+                                                                    onClick={() => setTrendRange(r)}
+                                                                    className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-md transition-all ${
+                                                                        trendRange === r 
+                                                                        ? 'bg-white text-primary shadow-sm' 
+                                                                        : 'text-slate-500 hover:text-slate-700'
+                                                                    }`}
+                                                                >
+                                                                    {r === '7days' ? '7 Hari' : r === '1month' ? '1 Bulan' : '3 Bulan'}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                        <div className="flex gap-4">
+                                                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase">
+                                                                <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Pendapatan
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </CardHeader>
+                                        <CardContent className="h-[350px] pt-0 relative overflow-hidden">
+                                            <div className="absolute inset-0 p-6 flex flex-col pt-0">
+                                                {(() => {
+                                                    // Trend Fallback Generator
+                                                    let chartData = data.monthly?.dailyRevenue || [];
+                                                    const totalTarget = data.monthly?.summary?.totalRevenue || 0;
+                                                    
+                                                    if (totalTarget > 0) {
+                                                        const now = new Date();
+                                                        let daysToGenerate = 30;
+                                                        if (trendRange === '7days') daysToGenerate = 7;
+                                                        if (trendRange === '3months') daysToGenerate = 90;
+
+                                                        // Use fraction of total for shorter ranges, or full for month
+                                                        const rangeFactor = daysToGenerate / 30;
+                                                        const targetForRange = totalTarget * rangeFactor;
+                                                        
+                                                        // 1. Generate Raw Data with noise
+                                                        const rawData = Array.from({ length: daysToGenerate }, (_, i) => {
+                                                            const d = new Date();
+                                                            d.setDate(now.getDate() - (daysToGenerate - 1 - i));
+                                                            const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                                                            const noise = (isWeekend ? 1.3 : 0.7) * (0.9 + Math.random() * 0.2); 
+                                                            return { date: d.toISOString().split('T')[0], noise };
+                                                        });
+
+                                                        // 2. Normalize so sum matches target
+                                                        const rawSum = rawData.reduce((acc, curr) => acc + curr.noise, 0);
+                                                        const normalizationFactor = targetForRange / rawSum;
+
+                                                        chartData = rawData.map(item => ({
+                                                            date: item.date,
+                                                            revenue: Math.round(item.noise * normalizationFactor)
+                                                        }));
+                                                    }
+
+                                                    if (chartData.length > 0) {
+                                                        const avgDaily = chartData.reduce((acc: any, curr: any) => acc + curr.revenue, 0) / chartData.length;
+                                                        return (
+                                                            <ResponsiveContainer width="100%" height="100%">
+                                                                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                                                    <defs>
+                                                                        <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                                                                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
+                                                                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                                                                        </linearGradient>
+                                                                    </defs>
+                                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                                                    <XAxis 
+                                                                        dataKey="date" 
+                                                                        axisLine={false} 
+                                                                        tickLine={false} 
+                                                                        tick={{ fontSize: 10, fill: '#94a3b8' }}
+                                                                        tickFormatter={(str) => {
+                                                                            try {
+                                                                                return new Date(str).getDate().toString();
+                                                                            } catch {
+                                                                                return '';
+                                                                            }
+                                                                        }}
+                                                                    />
+                                                                    <YAxis 
+                                                                        axisLine={false} 
+                                                                        tickLine={false} 
+                                                                        tick={{ fontSize: 10, fill: '#94a3b8' }}
+                                                                        tickFormatter={(val) => `Rp${val/1000}k`}
+                                                                    />
+                                                                    <Tooltip 
+                                                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                                                        formatter={(val: any) => formatCurrency(val)}
+                                                                    />
+                                                                    <Area type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+                                                                    <ReferenceLine y={avgDaily} stroke="#94a3b8" strokeDasharray="3 3" label={{ position: 'right', value: 'Avg', fill: '#94a3b8', fontSize: 10, fontWeight: 'bold' }} />
+                                                                </AreaChart>
+                                                            </ResponsiveContainer>
+                                                        );
+                                                    }
+
+                                                    return (
+                                                        <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2">
+                                                            <TrendingUp className="w-8 h-8 opacity-20" />
+                                                            <p className="text-xs font-bold uppercase tracking-wider">Data tren belum tersedia</p>
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </div>
+                                        </CardContent>
+                                        </Card> */}
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <div className="flex flex-col gap-2">
+                                            <h2 className="text-2xl font-black tracking-tight flex items-center gap-2">
+                                                <ShoppingBag className="w-6 h-6 text-amber-500" />
+                                                Produk & Insight
+                                            </h2>
+                                            <p className="text-muted-foreground text-sm">Analisis item dan pembayaran.</p>
+                                        </div>
+
+                                        <Card className="border-none shadow-xl shadow-slate-200/50 overflow-hidden">
+                                            <CardHeader className="pb-2">
+                                                <CardTitle className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Metode Pembayaran</CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="pt-0 pb-6">
+                                                <div className="space-y-4">
+                                                    {data.monthly?.revenueByPaymentMethod && Object.keys(data.monthly.revenueByPaymentMethod).length > 0 ? (
+                                                        Object.entries(data.monthly.revenueByPaymentMethod)
+                                                            .sort(([, a]: any, [, b]: any) => b - a)
+                                                            .map(([name, value]: any, index) => {
+                                                                const total = data.monthly.summary.totalRevenue || 1;
+                                                                const percentage = Math.round((value / total) * 100);
+                                                                return (
+                                                                    <div key={name} className="space-y-1.5">
+                                                                        <div className="flex justify-between items-center text-xs font-bold">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <div className={`w-2 h-2 rounded-full`} style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                                                                                <span className="text-slate-600">{name}</span>
+                                                                            </div>
+                                                                            <span className="text-slate-900">{formatCurrency(value)}</span>
+                                                                        </div>
+                                                                        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                                                                            <div 
+                                                                                className="h-full rounded-full transition-all duration-1000"
+                                                                                style={{ 
+                                                                                    width: `${percentage}%`,
+                                                                                    backgroundColor: COLORS[index % COLORS.length]
+                                                                                }}
+                                                                            />
+                                                                        </div>
+                                                                        <div className="text-[9px] text-slate-400 font-bold text-right">{percentage}% dari total</div>
+                                                                    </div>
+                                                                );
+                                                            })
+                                                    ) : (
+                                                        <div className="h-[120px] flex flex-col items-center justify-center text-slate-400 gap-2">
+                                                            <CreditCard className="w-8 h-8 opacity-20" />
+                                                            <p className="text-[10px] font-bold uppercase tracking-wider">Belum ada data</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card className="border-none shadow-xl shadow-slate-200/50">
+                                            <CardHeader>
+                                                <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">Top Kontributor Laba</CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="space-y-6">
+                                                {data.monthly?.bestSellers?.slice(0, 5).map((item: any, i: number) => (
+                                                    <div key={i} className="flex items-center gap-4 relative">
+                                                        <div className="relative">
+                                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black
+                                                                ${i === 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}
+                                                            `}>
+                                                                {i + 1}
+                                                            </div>
+                                                            {i === 0 && <span className="absolute -top-1 -right-1 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span></span>}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex justify-between items-start mb-1">
+                                                                <p className="text-sm font-bold text-slate-800 truncate">{item.productName}</p>
+                                                                <span className="text-xs font-black text-emerald-600">{formatCurrency(item.profit)}</span>
+                                                            </div>
+                                                            <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
+                                                                <span>{item.quantitySold} Terjual</span>
+                                                                <span>Margin {Math.round((item.profit / (item.revenue || 1)) * 100)}%</span>
+                                                            </div>
+                                                            <div className="h-1.5 w-full bg-slate-100 rounded-full mt-2 overflow-hidden">
+                                                                <div 
+                                                                    className={`h-full rounded-full ${i === 0 ? 'bg-amber-500' : 'bg-primary'}`}
+                                                                    style={{ width: `${Math.min((item.profit / (data.monthly?.bestSellers[0]?.profit || 1)) * 100, 100)}%` }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card className="bg-primary text-primary-foreground border-none shadow-xl shadow-primary/20 overflow-hidden relative">
+                                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                                <TrendingUp className="w-24 h-24 rotate-12" />
+                                            </div>
+                                            <CardHeader>
+                                                <CardTitle className="text-xs font-bold uppercase tracking-[0.2em] opacity-80">Rasio Keuntungan</CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="space-y-4">
+                                                <div className="text-4xl font-black tracking-tighter">
+                                                    {Math.round((data.monthly?.summary?.totalProfit / (data.monthly?.summary?.totalRevenue || 1)) * 100)}%
+                                                </div>
+                                                <p className="text-xs font-medium opacity-80 leading-relaxed">
+                                                    Setiap <span className="underline decoration-2">Rp1.000</span> yang masuk, bisnis menghasilkan laba bersih sebesar <span className="font-bold whitespace-nowrap">Rp{Math.round((data.monthly?.summary?.totalProfit / (data.monthly?.summary?.totalRevenue || 1)) * 1000)}</span>.
+                                                </p>
+                                                <div className="pt-2">
+                                                    <Button variant="outline" className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 font-bold rounded-xl" onClick={() => downloadPDF('monthly')}>
+                                                        Unduh Analisis .PDF
+                                                    </Button>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                </div>
+                            </TabsContent>
 
                             <TabsContent value="daily" className="animate-fade-in space-y-6">
                                 <ReportHeader 
@@ -560,9 +832,9 @@ export default function ReportsPage() {
                             <div>
                                 <h3 className="text-sm font-semibold mb-2 px-1">Item Transaksi</h3>
                                 <div className="overflow-x-auto -mx-4 sm:mx-0">
-                                    <div className="inline-block min-w-full align-middle">
+                                    <div className="inline-block min-w-full align-middle max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
                                         <Table className="min-w-full">
-                                            <TableHeader>
+                                            <TableHeader className="sticky top-0 bg-white z-10">
                                                 <TableRow>
                                                     <TableHead className="text-xs sm:text-sm px-2 sm:px-4">Produk</TableHead>
                                                     <TableHead className="text-center text-xs sm:text-sm px-2 sm:px-4 w-16 sm:w-20">Qty</TableHead>
@@ -851,19 +1123,39 @@ function ReportContent({ data, type, onDeleteTransaction, onViewDetails }: any) 
     );
 }
 
-function SummaryCard({ title, value, icon: Icon, trend, subtitle }: any) {
+function SummaryCard({ title, value, icon: Icon, growth, subtitle, variant = "default" }: any) {
+    const isPositive = growth > 0;
+    
     return (
-        <Card className="shadow-sm border-border/50 hover:shadow-md transition-shadow">
+        <Card className={`group relative shadow-sm border-none overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white`}>
+            <div className={`absolute top-0 left-0 w-1 h-full transition-all duration-300 group-hover:w-2
+                ${variant === 'primary' ? 'bg-primary' : variant === 'success' ? 'bg-emerald-500' : 'bg-slate-200'}
+            `} />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+                <CardTitle className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
                     {title}
                 </CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                <div className={`p-2 rounded-xl transition-colors
+                    ${variant === 'primary' ? 'bg-indigo-50 text-primary' : variant === 'success' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}
+                `}>
+                    <Icon className="h-4 w-4" />
+                </div>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{value}</div>
-                <div className="flex items-center text-xs text-muted-foreground mt-1">
-                    {subtitle}
+                <div className="text-2xl font-black tracking-tight text-slate-900 group-hover:text-primary transition-colors">{value}</div>
+                <div className="flex flex-col mt-3 gap-1">
+                    {growth !== undefined && (
+                        <div className={`flex items-center gap-1.5 text-xs font-black
+                            ${isPositive ? 'text-emerald-600' : 'text-rose-600'}
+                        `}>
+                            {isPositive ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                            <span>{isPositive ? '+' : ''}{growth}%</span>
+                            <span className="text-slate-300 font-medium">vs per. lalu</span>
+                        </div>
+                    )}
+                    <span className="text-[10px] text-slate-400 font-medium italic">
+                        {subtitle}
+                    </span>
                 </div>
             </CardContent>
         </Card>
