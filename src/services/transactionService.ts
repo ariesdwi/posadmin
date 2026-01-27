@@ -7,6 +7,9 @@ export interface TransactionFilter {
   status?: 'PENDING' | 'COMPLETED' | 'CANCELLED' | '';
   userId?: string;
   tableNumber?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
 }
 
 export const getTransactions = async (filters: TransactionFilter = {}) => {
@@ -16,6 +19,9 @@ export const getTransactions = async (filters: TransactionFilter = {}) => {
   if (filters.status) params.append('status', filters.status);
   if (filters.userId) params.append('userId', filters.userId);
   if (filters.tableNumber) params.append('tableNumber', filters.tableNumber);
+  if (filters.search) params.append('transactionNumber', filters.search);
+  if (filters.page) params.append('page', filters.page.toString());
+  if (filters.limit) params.append('limit', filters.limit.toString());
 
   return api.get(`/transactions?${params.toString()}`);
 };
@@ -30,4 +36,15 @@ export const updateTransactionStatus = async (id: string, status: string) => {
 
 export const deleteTransaction = async (id: string) => {
   return api.delete(`/transactions/${id}`);
+};
+
+export const exportTransactionsPDF = async (filters: { startDate?: string; endDate?: string }) => {
+  const params: any = {};
+  if (filters.startDate) params.startDate = filters.startDate;
+  if (filters.endDate) params.endDate = filters.endDate;
+
+  return api.get('/reports/export/transactions', {
+    params,
+    responseType: 'blob',
+  });
 };
