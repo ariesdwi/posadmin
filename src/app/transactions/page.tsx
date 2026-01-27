@@ -42,7 +42,7 @@ import {
     Printer
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { getTransactions, deleteTransaction } from "@/services/transactionService";
+import { getTransactions, deleteTransaction, exportTransactionsPDF } from "@/services/transactionService";
 
 export default function TransactionsPage() {
     const [transactions, setTransactions] = useState<any[]>([]);
@@ -51,10 +51,24 @@ export default function TransactionsPage() {
         startDate: string;
         endDate: string;
         status: "PENDING" | "COMPLETED" | "CANCELLED" | "";
+        search: string;
+        page: number;
+        limit: number;
     }>({
         startDate: "",
         endDate: "",
-        status: ""
+        status: "",
+        search: "",
+        page: 1,
+        limit: 10
+    });
+
+    const [meta, setMeta] = useState({
+        totalItems: 0,
+        itemCount: 0,
+        itemsPerPage: 10,
+        totalPages: 0,
+        currentPage: 1
     });
     
     // Details Modal
@@ -65,12 +79,33 @@ export default function TransactionsPage() {
     const [transactionToDelete, setTransactionToDelete] = useState<any>(null);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [downloadLoading, setDownloadLoading] = useState(false);
+    
+    // Download Modal
+    const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+    const [downloadDates, setDownloadDates] = useState({
+        startDate: "",
+        endDate: ""
+    });
 
     const fetchTransactions = async () => {
         try {
             setLoading(true);
             const res = await getTransactions(filters);
-            setTransactions(res.data || []);
+            
+            // Handle both array and paginated response
+            if (Array.isArray(res.data)) {
+                setTransactions(res.data);
+                // Fallback for non-paginated backend
+                setMeta(prev => ({ ...prev, totalItems: res.data.length, totalPages: 1 }));
+            } else if (res.data && res.data.items) {
+                setTransactions(res.data.items);
+                if (res.data.meta) {
+                    setMeta(res.data.meta);
+                }
+            } else {
+                setTransactions([]);
+            }
         } catch (error) {
             console.error("Failed to fetch transactions", error);
         } finally {
@@ -110,14 +145,26 @@ export default function TransactionsPage() {
 
     const applyFilters = (e: React.FormEvent) => {
         e.preventDefault();
+        setFilters(prev => ({ ...prev, page: 1 })); // Reset to first page
         fetchTransactions();
     };
+
+    const handlePageChange = (newPage: number) => {
+        setFilters(prev => ({ ...prev, page: newPage }));
+    };
+
+    useEffect(() => {
+        fetchTransactions();
+    }, [filters.page]); // Fetch when page changes
 
     const resetFilters = () => {
         setFilters({
             startDate: "",
             endDate: "",
-            status: ""
+            status: "",
+            search: "",
+            page: 1,
+            limit: 10
         });
         // We need to fetch again with empty filters
         setTimeout(() => fetchTransactions(), 0);
@@ -137,6 +184,47 @@ export default function TransactionsPage() {
             alert("Gagal menghapus transaksi. Silakan coba lagi.");
         } finally {
             setDeleting(false);
+        }
+    };
+
+    const openDownloadModal = () => {
+        const today = new Date().toISOString().split('T')[0];
+        setDownloadDates({
+            startDate: filters.startDate || today,
+            endDate: filters.endDate || today
+        });
+        setIsDownloadModalOpen(true);
+    };
+
+    const executeDownloadPDF = async () => {
+        if (!downloadDates.startDate || !downloadDates.endDate) {
+            alert("Harap pilih tanggal mulai dan tanggal akhir.");
+            return;
+        }
+
+        try {
+            setDownloadLoading(true);
+            const response = await exportTransactionsPDF({
+                startDate: downloadDates.startDate,
+                endDate: downloadDates.endDate
+            });
+
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const today = new Date().toISOString().split('T')[0];
+            a.download = `riwayat-transaksi-${today}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            setIsDownloadModalOpen(false);
+        } catch (error) {
+            console.error("Failed to download PDF", error);
+            alert("Gagal mengunduh PDF. Silakan coba lagi.");
+        } finally {
+            setDownloadLoading(false);
         }
     };
 
@@ -187,8 +275,14 @@ export default function TransactionsPage() {
                                 Lihat dan kelola semua data penjualan.
                             </p>
                         </div>
-                        <Button variant="outline" className="flex items-center gap-2">
-                            <Download className="w-4 h-4" /> Ekspor CSV
+                        <Button 
+                            variant="outline" 
+                            className="flex items-center gap-2"
+                            onClick={openDownloadModal}
+                            disabled={downloadLoading}
+                        >
+                            <Download className="w-4 h-4" />
+                            Download PDF
                         </Button>
                     </div>
 
@@ -201,7 +295,21 @@ export default function TransactionsPage() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <form onSubmit={applyFilters} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                            <form onSubmit={applyFilters} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                                {/* <div className="space-y-2 lg:col-span-1">
+                                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Cari Nomor Transaksi</label>
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                        <Input 
+                                            type="text" 
+                                            name="search"
+                                            placeholder="Masukkan No. Transaksi..."
+                                            value={filters.search}
+                                            onChange={handleFilterChange}
+                                            className="pl-9" 
+                                        />
+                                    </div>
+                                </div> */}
                                 <div className="space-y-2">
                                     <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Tanggal Mulai</label>
                                     <div className="relative">
@@ -374,6 +482,76 @@ export default function TransactionsPage() {
                                 </TableBody>
                             </Table>
                         </div>
+                        
+                        {/* Pagination */}
+                        {meta.totalPages > 1 && (
+                            <div className="flex items-center justify-between px-4 py-4 bg-slate-50 border-t border-border">
+                                <div className="flex-1 flex justify-between sm:hidden">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={filters.page === 1}
+                                        onClick={() => handlePageChange(filters.page - 1)}
+                                    >
+                                        Sebelumnya
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={filters.page === meta.totalPages}
+                                        onClick={() => handlePageChange(filters.page + 1)}
+                                    >
+                                        Selanjutnya
+                                    </Button>
+                                </div>
+                                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">
+                                            Menampilkan halaman <span className="font-bold text-foreground">{meta.currentPage}</span> dari <span className="font-bold text-foreground">{meta.totalPages}</span>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                                            <Button
+                                                variant="outline"
+                                                className="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 hover:bg-slate-50 focus:z-20 h-9 w-9 p-0"
+                                                disabled={filters.page === 1}
+                                                onClick={() => handlePageChange(filters.page - 1)}
+                                            >
+                                                <TrendingDown className="h-4 w-4 rotate-90" />
+                                            </Button>
+                                            
+                                            {Array.from({ length: meta.totalPages }, (_, i) => i + 1)
+                                                .filter(p => p === 1 || p === meta.totalPages || (p >= filters.page - 1 && p <= filters.page + 1))
+                                                .map((p, i, arr) => {
+                                                    const showEllipsis = i > 0 && p !== arr[i-1] + 1;
+                                                    return (
+                                                        <div key={p} className="flex">
+                                                            {showEllipsis && <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-700">...</span>}
+                                                            <Button
+                                                                variant={filters.page === p ? "default" : "outline"}
+                                                                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 h-9 min-w-[36px] p-0 ${filters.page === p ? 'z-10 bg-primary text-primary-foreground focus-visible:outline-offset-0' : 'text-slate-900 border-border'}`}
+                                                                onClick={() => handlePageChange(p)}
+                                                            >
+                                                                {p}
+                                                            </Button>
+                                                        </div>
+                                                    );
+                                                })}
+
+                                            <Button
+                                                variant="outline"
+                                                className="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 hover:bg-slate-50 focus:z-20 h-9 w-9 p-0"
+                                                disabled={filters.page === meta.totalPages}
+                                                onClick={() => handlePageChange(filters.page + 1)}
+                                            >
+                                                <TrendingUp className="h-4 w-4 rotate-90" />
+                                            </Button>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </Card>
                 </main>
             </div>
@@ -460,6 +638,60 @@ export default function TransactionsPage() {
                             </div>
                         </div>
                     )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Download Modal */}
+            <Dialog open={isDownloadModalOpen} onOpenChange={setIsDownloadModalOpen}>
+                <DialogContent className="max-w-sm rounded-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Download Laporan PDF</DialogTitle>
+                        <DialogDescription>
+                            Pilih periode tanggal untuk laporan transaksi.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Tanggal Mulai</label>
+                            <Input 
+                                type="date" 
+                                value={downloadDates.startDate}
+                                onChange={(e) => setDownloadDates(prev => ({ ...prev, startDate: e.target.value }))}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Tanggal Akhir</label>
+                            <Input 
+                                type="date" 
+                                value={downloadDates.endDate}
+                                onChange={(e) => setDownloadDates(prev => ({ ...prev, endDate: e.target.value }))}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter className="flex flex-col sm:flex-row gap-2">
+                        <Button 
+                            variant="outline" 
+                            onClick={() => setIsDownloadModalOpen(false)}
+                            disabled={downloadLoading}
+                            className="flex-1"
+                        >
+                            Batal
+                        </Button>
+                        <Button 
+                            onClick={executeDownloadPDF}
+                            disabled={downloadLoading}
+                            className="flex-1"
+                        >
+                            {downloadLoading ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Mengunduh...
+                                </>
+                            ) : (
+                                "Download"
+                            )}
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
 
