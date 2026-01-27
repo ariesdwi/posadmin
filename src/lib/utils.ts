@@ -23,3 +23,9 @@ export function formatDate(dateString: string) {
     minute: "2-digit",
   });
 }
+export function getInclusiveEndDate(dateString: string) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  date.setDate(date.getDate() + 1);
+  return date.toISOString().split("T")[0];
+}

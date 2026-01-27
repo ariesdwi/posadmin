@@ -16,7 +16,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getInclusiveEndDate } from "@/lib/utils";
 import api from "@/lib/api";
 import {
     AreaChart,
@@ -137,7 +137,7 @@ export default function ReportsPage() {
 
         try {
             setCustomLoading(true);
-            const response = await api.get(`/reports/custom?startDate=${startDate}&endDate=${endDate}`);
+            const response = await api.get(`/reports/custom?startDate=${startDate}&endDate=${getInclusiveEndDate(endDate)}`);
             setData(prev => ({
                 ...prev,
                 custom: response.data
@@ -639,7 +639,7 @@ export default function ReportsPage() {
                                                     }
                                                     try {
                                                         setCustomLoading(true);
-                                                        const res = await api.get(`/reports/margin?startDate=${startDate}&endDate=${endDate}`);
+                                                        const res = await api.get(`/reports/margin?startDate=${startDate}&endDate=${getInclusiveEndDate(endDate)}`);
                                                         setData(prev => ({ ...prev, custom: res.data }));
                                                     } catch (err) {
                                                         console.error(err);
