@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Plus, Search, Edit, Trash2, Loader2, Package } from "lucide-react";
 import api from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
+import { processImageFile } from "@/lib/imageUtils";
 import { createProduct, updateProduct, deleteProduct } from "../../services/productService";
 
 console.log('ProductService imported:', { createProduct, updateProduct });
@@ -63,6 +64,7 @@ export default function ProductsPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [formLoading, setFormLoading] = useState(false);
+  const [imageProcessing, setImageProcessing] = useState(false);
 
   const { user } = useAuth();
   
@@ -139,16 +141,37 @@ export default function ProductsPage() {
     setImagePreview("");
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
+    if (!file) return;
+
+    setImageProcessing(true);
+    
+    try {
+      // Validate and compress image
+      const result = await processImageFile(file, 3); // 3MB max
+      
+      if (result.error) {
+        alert(result.error);
+        e.target.value = ''; // Reset input
+        setImageProcessing(false);
+        return;
+      }
+
+      setSelectedFile(result.file);
+      
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
+        setImageProcessing(false);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(result.file);
+    } catch (error) {
+      console.error('Error processing image:', error);
+      alert('Gagal memproses gambar. Silakan coba lagi.');
+      e.target.value = '';
+      setImageProcessing(false);
     }
   };
 
@@ -425,8 +448,9 @@ export default function ProductsPage() {
              <div className="space-y-4">
                 <h3 className="text-sm font-semibold border-b pb-2">Gambar Produk</h3>
                 <div className="space-y-3">
-                   <Input id="imageFile" name="imageFile" type="file" accept="image/*" onChange={handleFileChange} className="cursor-pointer" />
-                   <p className="text-xs text-muted-foreground">JPG, PNG, atau WebP (maks 5MB)</p>
+                   <Input id="imageFile" name="imageFile" type="file" accept="image/*" onChange={handleFileChange} className="cursor-pointer" disabled={imageProcessing} />
+                   <p className="text-xs text-muted-foreground">JPG, PNG, atau WebP (maks 3MB) - Otomatis dikompres</p>
+                   {imageProcessing && <p className="text-xs text-primary">Memproses gambar...</p>}
                    {imagePreview && (<div className="flex gap-3 p-3 bg-muted rounded-lg"><img src={imagePreview} alt="Preview" className="w-20 h-20 object-cover rounded-md" /><span className="text-sm text-muted-foreground">Siap diunggah</span></div>)}
                 </div>
              </div>
@@ -491,8 +515,9 @@ export default function ProductsPage() {
              <div className="space-y-4">
                 <h3 className="text-sm font-semibold border-b pb-2">Gambar Produk</h3>
                 <div className="space-y-3">
-                   <Input id="edit-imageFile" name="imageFile" type="file" accept="image/*" onChange={handleFileChange} className="cursor-pointer" />
-                   <p className="text-xs text-muted-foreground">Unggah gambar baru (JPG, PNG, atau WebP)</p>
+                   <Input id="edit-imageFile" name="imageFile" type="file" accept="image/*" onChange={handleFileChange} className="cursor-pointer" disabled={imageProcessing} />
+                   <p className="text-xs text-muted-foreground">Unggah gambar baru (JPG, PNG, atau WebP, maks 3MB)</p>
+                   {imageProcessing && <p className="text-xs text-primary">Memproses gambar...</p>}
                    {(imagePreview || formData.image) && (<div className="flex gap-3 p-3 bg-muted rounded-lg"><img src={imagePreview || getValidImageUrl(formData.image)} alt="Preview" className="w-20 h-20 object-cover rounded-md" /><span className="text-sm text-muted-foreground">{imagePreview ? "Gambar baru dipilih" : "Gambar saat ini"}</span></div>)}
                 </div>
              </div>
