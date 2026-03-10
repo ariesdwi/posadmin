@@ -38,6 +38,10 @@ export const deleteTransaction = async (id: string) => {
   return api.delete(`/transactions/${id}`);
 };
 
+export const updateTransaction = async (id: string, data: any) => {
+  return api.patch(`/transactions/${id}`, data);
+};
+
 export const exportTransactionsPDF = async (filters: { startDate?: string; endDate?: string }) => {
   const params: any = {};
   if (filters.startDate) params.startDate = filters.startDate;
