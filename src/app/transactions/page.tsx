@@ -43,6 +43,8 @@ import {
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { getTransactions, deleteTransaction, exportTransactionsPDF } from "@/services/transactionService";
+import EditTransactionModal from "./components/EditTransactionModal";
+import { Edit } from "lucide-react";
 
 export default function TransactionsPage() {
     const [transactions, setTransactions] = useState<any[]>([]);
@@ -80,6 +82,10 @@ export default function TransactionsPage() {
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [downloadLoading, setDownloadLoading] = useState(false);
+    
+    // Edit Modal
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [transactionToEdit, setTransactionToEdit] = useState<any>(null);
     
     // Download Modal
     const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
@@ -467,6 +473,17 @@ export default function TransactionsPage() {
                                                             variant="ghost" 
                                                             size="sm" 
                                                             onClick={() => {
+                                                                setTransactionToEdit(trx);
+                                                                setIsEditOpen(true);
+                                                            }}
+                                                            className="hover:text-blue-600 h-8 w-8 p-0"
+                                                        >
+                                                            <Edit className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="sm" 
+                                                            onClick={() => {
                                                                 setTransactionToDelete(trx);
                                                                 setIsDeleteOpen(true);
                                                             }}
@@ -736,6 +753,16 @@ export default function TransactionsPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            <EditTransactionModal 
+                isOpen={isEditOpen}
+                onClose={() => {
+                    setIsEditOpen(false);
+                    setTransactionToEdit(null);
+                }}
+                transaction={transactionToEdit}
+                onSuccess={fetchTransactions}
+            />
         </div>
     );
 }
